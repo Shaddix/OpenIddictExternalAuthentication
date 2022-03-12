@@ -1,0 +1,97 @@
+@model object
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>OAuth</title>
+</head>
+<body>
+<div>
+    <div>
+        <h1>Sign-in via OAuth</h1>
+        <button onclick="signInVia('Google')">Google</button>
+        <button onclick="signInVia('Facebook')">Facebook</button>
+        <button onclick="signInVia('Microsoft')">Microsoft</button>
+        <button onclick="signInVia('OpenIdConnect')">AzureAD</button>
+        <button onclick="signInVia('GitHub')">GitHub</button>
+        <button onclick="signInVia('Twitter')">Twitter</button>
+    </div>
+
+    <div>
+        <h1>Values</h1>
+        <button onclick="getValues()">Get Values</button>
+        <button onclick="getDocuments()">Get Documents</button>
+        <button onclick="getUsers()">Get Users</button>
+    </div>
+
+</div>
+<script type="module">
+  import {
+    getOAuthCode
+  } from '/js/auth-social.js';
+    let _accessToken = '';
+    async function signInVia(provider) {
+        const data = await getOAuthCode(provider);
+        await getAccessToken(data.provider, data.code);
+    }
+
+    async function getAccessToken(provider, code) {
+        const response = await fetch(`/connect/token`,
+                {
+                    method: 'POST',
+                    body: `grant_type=external&scope=local&provider=${provider}&code=${encodeURIComponent(code)}`,
+                    headers: {
+                        'Authorization': `Basic Y2xpZW50OnNlY3JldA==`, //base64 encoded 'client:secret'
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                });
+        const jsonData = await response.json();
+        _accessToken = jsonData.access_token;
+        alert(`access_token: ${_accessToken}`);
+    }
+
+    function getData(url) {
+        fetch(url,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${_accessToken}`,
+                        'Content-Type': 'application/json;'
+                    }
+                })
+            .catch(error => {
+                alert(error);
+            })
+            .then(response => {
+                if (!response.ok) {
+                    alert('Error (Unauthorized)');
+                    return null;
+                }
+                return response.json();
+            })
+            .then(dt => {
+                if (dt != null) {
+                    console.log(dt);
+                    alert(dt);
+                }
+            });
+    }
+    function getValues() {
+        getData('/api/values');
+    }
+    function getUsers() {
+        getData('/api/permissions/users');
+        }
+    
+    function getDocuments() {
+        getData('/api/permissions/documents');
+        }
+        
+    window.signInVia = signInVia;
+    window.getAccessToken = getAccessToken;
+    window.getValues = getValues;
+    window.getDocuments = getDocuments;
+    window.getUsers = getUsers;
+</script>
+</body>
+</html>

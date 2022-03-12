@@ -1,0 +1,23 @@
+﻿using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+
+namespace OpenIddictExternalAuthentication.Example.Permissions;
+
+public class AuthorizationController : OpenIdAuthorizationControllerBase<IdentityUser, string>
+{
+    public AuthorizationController(SignInManager<IdentityUser> signInManager,
+        UserManager<IdentityUser> userManager,
+        IOpenIddictConfigurationProvider configurationProvider) : base(signInManager, userManager,
+        configurationProvider)
+    {
+    }
+
+    protected override async Task<IList<Claim>> GetClaims(IdentityUser user)
+    {
+        var claims = await base.GetClaims(user);
+        claims.Add(new Claim(ClaimType.Permission, Permission.UserManagement.ToString()));
+        return claims;
+    }
+}

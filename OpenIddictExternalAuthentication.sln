@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIddictExternalAuthentication.Example", "OpenIddictExternalAuthentication.Example\OpenIddictExternalAuthentication.Example.csproj", "{D77ECA96-BD16-49B9-84BB-4D19D226C091}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIddictExternalAuthentication", "OpenIddictExternalAuthentication\OpenIddictExternalAuthentication.csproj", "{4EF94A65-F762-4525-B305-35E9DD4B3905}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D77ECA96-BD16-49B9-84BB-4D19D226C091}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D77ECA96-BD16-49B9-84BB-4D19D226C091}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D77ECA96-BD16-49B9-84BB-4D19D226C091}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D77ECA96-BD16-49B9-84BB-4D19D226C091}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EF94A65-F762-4525-B305-35E9DD4B3905}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EF94A65-F762-4525-B305-35E9DD4B3905}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EF94A65-F762-4525-B305-35E9DD4B3905}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EF94A65-F762-4525-B305-35E9DD4B3905}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

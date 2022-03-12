@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageVersion>1.0.1</PackageVersion>
+        <Title>OpenIddictExternalAuthentication</Title>
+        <Authors>Artur Drobinskiy</Authors>
+        <Description>OpenIddict extension to support Auth code flow fo built-in ASP.Net identity providers</Description>
+        <RepositoryUrl>https://github.com/Shaddix/OpenIddictExternalAuthentication</RepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryType>GitHub</RepositoryType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <DocumentationFile>bin\Release\OpenIddictExternalAuthentication.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="OpenIddict.AspNetCore" Version="3.1.1" />
+        <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="6.0.0" />
+        <PackageReference Include="IdentityModel" Version="6.0.0" />
+    </ItemGroup>
+
+</Project>
