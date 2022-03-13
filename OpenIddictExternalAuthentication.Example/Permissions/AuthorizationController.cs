@@ -2,8 +2,9 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 
-namespace OpenIddictExternalAuthentication.Example.Permissions;
+namespace Shaddix.OpenIddict.ExternalAuthentication.Example.Permissions;
 
 public class AuthorizationController : OpenIdAuthorizationControllerBase<IdentityUser, string>
 {

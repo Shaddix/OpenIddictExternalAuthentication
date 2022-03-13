@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.Extensions.Options;
 
-namespace OpenIddictExternalAuthentication;
+namespace Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 
 /// <summary>
 /// Provides configuration for openiddict client (

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OpenIddictExternalAuthentication.Example.Permissions;
+using Shaddix.OpenIddict.ExternalAuthentication.Example.Permissions;
 
-namespace OpenIddictExternalAuthentication.Example.Controllers
+namespace Shaddix.OpenIddict.ExternalAuthentication.Example.Controllers
 {
     [Route("api/permissions")]
     [ApiController]

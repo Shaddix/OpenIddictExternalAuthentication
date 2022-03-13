@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace OpenIddictExternalAuthentication.Example
+namespace Shaddix.OpenIddict.ExternalAuthentication.Example
 {
     public class Program
     {

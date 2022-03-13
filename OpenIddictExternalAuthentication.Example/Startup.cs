@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -10,9 +9,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;
-using OpenIddictExternalAuthentication.Example.Permissions;
+using Shaddix.OpenIddict.ExternalAuthentication.Example.Permissions;
+using Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 
-namespace OpenIddictExternalAuthentication.Example
+namespace Shaddix.OpenIddict.ExternalAuthentication.Example
 {
     public class Startup
     {

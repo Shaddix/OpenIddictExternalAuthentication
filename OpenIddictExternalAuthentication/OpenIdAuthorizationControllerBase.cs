@@ -20,9 +20,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
+using Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
-namespace OpenIddictExternalAuthentication;
+namespace Shaddix.OpenIddict.ExternalAuthentication;
 
 /// <summary>
 /// Default implementation of AuthorizationController that allows logging in via external login providers

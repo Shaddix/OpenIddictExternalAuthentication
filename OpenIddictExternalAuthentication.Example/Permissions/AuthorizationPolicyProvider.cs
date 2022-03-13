@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 
-namespace OpenIddictExternalAuthentication.Example.Permissions
+namespace Shaddix.OpenIddict.ExternalAuthentication.Example.Permissions
 {
     public class AuthorizationPolicyProvider : DefaultAuthorizationPolicyProvider
     {

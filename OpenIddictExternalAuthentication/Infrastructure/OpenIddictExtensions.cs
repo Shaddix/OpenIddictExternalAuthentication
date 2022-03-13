@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenIddict.Abstractions;
 
-namespace OpenIddictExternalAuthentication;
+namespace Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 
 /// <summary>
 /// Convenience extensions for OpenIddict

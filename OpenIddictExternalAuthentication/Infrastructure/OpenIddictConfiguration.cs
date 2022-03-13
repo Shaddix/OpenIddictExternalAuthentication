@@ -1,6 +1,6 @@
 ﻿using OpenIddict.Abstractions;
 
-namespace OpenIddictExternalAuthentication;
+namespace Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 
 /// <summary>
 /// OpenIddict configuration

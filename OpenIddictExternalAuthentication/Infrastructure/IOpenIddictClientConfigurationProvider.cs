@@ -1,7 +1,7 @@
 #nullable enable
 using System.Collections.Generic;
 
-namespace OpenIddictExternalAuthentication;
+namespace Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 
 /// <summary>
 /// Provides configurations for OpenId clients

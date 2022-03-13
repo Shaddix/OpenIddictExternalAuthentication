@@ -1,4 +1,4 @@
-namespace OpenIddictExternalAuthentication.Example.Permissions
+namespace Shaddix.OpenIddict.ExternalAuthentication.Example.Permissions
 {
     public enum Permission
     {

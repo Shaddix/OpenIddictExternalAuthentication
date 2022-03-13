@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 
-namespace OpenIddictExternalAuthentication.Example.Permissions
+namespace Shaddix.OpenIddict.ExternalAuthentication.Example.Permissions
 {
     public class PermissionAuthorizeAttribute : AuthorizeAttribute
     {

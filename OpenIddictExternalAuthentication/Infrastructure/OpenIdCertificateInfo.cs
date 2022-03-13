@@ -1,4 +1,4 @@
-﻿namespace OpenIddictExternalAuthentication;
+﻿namespace Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 
 /// <summary>
 /// DTO for certificate information
