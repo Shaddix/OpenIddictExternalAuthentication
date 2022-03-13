@@ -3,18 +3,21 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>1.0.2</PackageVersion>
+        <PackageVersion>1.0.4</PackageVersion>
         <Title>Shaddix.OpenIddict.ExternalAuthentication</Title>
         <Authors>Artur Drobinskiy</Authors>
         <Description>OpenIddict extension to support Auth code flow fo built-in ASP.Net identity providers</Description>
         <RepositoryUrl>https://github.com/Shaddix/OpenIddictExternalAuthentication</RepositoryUrl>
         <PackageProjectUrl>https://github.com/Shaddix/OpenIddictExternalAuthentication</PackageProjectUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <RepositoryType>GitHub</RepositoryType>
         <AssemblyName>Shaddix.OpenIddict.ExternalAuthentication</AssemblyName>
         <RootNamespace>Shaddix.OpenIddict.ExternalAuthentication</RootNamespace>
     </PropertyGroup>
-
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
         <DebugSymbols>true</DebugSymbols>
         <DebugType>full</DebugType>
@@ -22,10 +25,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="OpenIddict.AspNetCore" Version="3.1.1" />
-        <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="6.0.0" />
-        <PackageReference Include="IdentityModel" Version="6.0.0" />
+        <PackageReference Include="OpenIddict.AspNetCore" Version="3.1.1"/>
+        <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="6.0.0"/>
+        <PackageReference Include="IdentityModel" Version="6.0.0"/>
     </ItemGroup>
 
 </Project>
