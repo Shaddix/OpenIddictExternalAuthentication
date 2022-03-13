@@ -201,7 +201,7 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
                     }
                 }
             );
-            
+
             app.UseOpenIdDictApplicationsFromConfiguration().GetAwaiter().GetResult();
         }
     }

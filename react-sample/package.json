@@ -20,7 +20,7 @@
   },
   "scripts": {
     "start": "cross-env PORT=3140 react-scripts start",
-    "build": "react-scripts build",
+    "build": "cross-env PUBLIC_URL=/react react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

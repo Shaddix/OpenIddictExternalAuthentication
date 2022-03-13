@@ -3,8 +3,8 @@ import { completeAuthorization } from './openid-manager';
 import { authCallbackPath } from './openid-settings';
 
 export const OpenIdCallback: React.FC = (props) => {
-  const url = window.location.pathname;
-  const isOpenIdCallback = url.startsWith(authCallbackPath);
+  const url = window.location.href;
+  const isOpenIdCallback = url.includes(authCallbackPath);
   useEffect(() => {
     if (isOpenIdCallback) {
       // noinspection JSIgnoredPromiseFromCall
