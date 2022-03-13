@@ -164,6 +164,7 @@ namespace OpenIddictExternalAuthentication.Example
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseDefaultFiles();
             app.UseStaticFiles();
             app.UseEndpoints(
                 endpoints =>
