@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "OpenIddictExternalAuthentication.Example": {
+    "Shaddix.OpenIddict.ExternalAuthentication.Example": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "",

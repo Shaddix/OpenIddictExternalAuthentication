@@ -57,6 +57,7 @@
     async function signInVia(provider) {
         try {
             const user = await openExternalLoginPopup(provider);
+            alert('Authentication succeeded');
             console.log('User', user);
             _accessToken = user.access_token;
         } catch (e) {
@@ -69,10 +70,11 @@
             const user = await userManager.signinPopup({
                 extraQueryParams: {provider: provider},
             });
-            alert('Authentication succeeded');
+
             return user;
         } catch (e) {
             console.error('Error during external authentication', e);
+            throw e;
         }
     }
 

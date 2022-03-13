@@ -17,6 +17,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="6.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.AzureAD.UI" Version="6.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.Twitter" Version="6.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="6.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.0" />
         <PackageReference Include="Microsoft.Identity.Web" Version="1.20.0" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.0" />

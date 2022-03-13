@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Net.Http.Headers;
 using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;
 using Shaddix.OpenIddict.ExternalAuthentication.Example.Permissions;
@@ -32,7 +36,6 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
             services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
 
             services.AddControllers();
-
             services.AddDbContext<IdentityContext>(
                 options =>
                 {
@@ -171,6 +174,31 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
                 {
                     endpoints.MapRazorPages();
                     endpoints.MapControllers();
+                }
+            );
+            app.UseSpa(
+                spa =>
+                {
+                    spa.Options.SourcePath = "wwwroot/react";
+                    // https://github.com/dotnet/aspnetcore/issues/3147#issuecomment-435617378
+                    spa.Options.DefaultPageStaticFileOptions = new StaticFileOptions()
+                    {
+                        OnPrepareResponse = ctx =>
+                        {
+                            // Do not cache implicit `/index.html`
+                            var headers = ctx.Context.Response.GetTypedHeaders();
+                            headers.CacheControl = new CacheControlHeaderValue
+                            {
+                                Public = true,
+                                MaxAge = TimeSpan.FromDays(0)
+                            };
+                        }
+                    };
+
+                    if (_webHostEnvironment.IsDevelopment())
+                    {
+                        spa.UseProxyToSpaDevelopmentServer("http://localhost:3140/");
+                    }
                 }
             );
             
