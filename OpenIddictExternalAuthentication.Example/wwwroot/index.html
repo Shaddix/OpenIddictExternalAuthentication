@@ -69,6 +69,7 @@
             const user = await userManager.signinPopup({
                 extraQueryParams: {provider: provider},
             });
+            alert('Authentication succeeded');
             return user;
         } catch (e) {
             console.error('Error during external authentication', e);
