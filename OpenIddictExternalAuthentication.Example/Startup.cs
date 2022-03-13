@@ -68,9 +68,9 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
                     options.ClaimsIdentity.EmailClaimType = OpenIddictConstants.Claims.Email;
                 }
             );
-            services.AddOpenIddictConfigurations(Configuration);
             services
                 .AddOpenIddict()
+                .AddOpenIddictConfigurations(Configuration)
                 .AddDefaultAuthorizationController()
                 .AddCore(options =>
                 {

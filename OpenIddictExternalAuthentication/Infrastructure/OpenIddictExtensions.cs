@@ -104,18 +104,21 @@ public static class OpenIddictExtensions
     /// <summary>
     /// Registers implementation of IOption&lt;OpenIddictConfiguration&gt; and IOpenIddictClientConfigurationProvider
     /// </summary>
-    public static void AddOpenIddictConfigurations(
-        this IServiceCollection services,
+    public static OpenIddictBuilder AddOpenIddictConfigurations(
+        this OpenIddictBuilder openIddictBuilder,
         IConfiguration configuration,
         string configurationSection = "OpenId"
     )
     {
+        IServiceCollection services = openIddictBuilder.Services;
         services
             .AddTransient<IOpenIddictClientConfigurationProvider,
                 OpenIddictClientConfigurationProvider>();
         services.Configure<OpenIddictConfiguration>(
             configuration.GetSection($"{configurationSection}")
         );
+        
+        return openIddictBuilder;
     }
 
     /// <summary>

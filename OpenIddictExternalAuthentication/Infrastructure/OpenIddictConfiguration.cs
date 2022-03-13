@@ -24,7 +24,7 @@ public class OpenIddictClientConfiguration : OpenIddictApplicationDescriptor
     public int? AccessTokenLifetime { get; set; }
     
     /// <summary>
-    /// Rolling lifetime of a refresh token in seconds ( by default) 
+    /// Rolling lifetime of a refresh token in seconds (14 days by default) 
     /// </summary>
     public int? RefreshTokenLifetime { get; set; }
 }
