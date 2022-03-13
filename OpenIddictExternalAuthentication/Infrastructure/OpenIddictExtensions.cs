@@ -8,8 +8,14 @@ using OpenIddict.Abstractions;
 
 namespace OpenIddictExternalAuthentication;
 
+/// <summary>
+/// Convenience extensions for OpenIddict
+/// </summary>
 public static class OpenIddictExtensions
 {
+    /// <summary>
+    /// Configures openiddict with signing certificate from appsettings.json 
+    /// </summary>
     public static void AddSigningCertificateFromConfiguration(
         this OpenIddictServerBuilder options,
         IConfiguration configuration,
@@ -33,6 +39,9 @@ public static class OpenIddictExtensions
         }
     }
 
+    /// <summary>
+    /// Configures openiddict with encryption certificate from appsettings.json 
+    /// </summary>
     public static void AddEncryptionCertificateFromConfiguration(
         this OpenIddictServerBuilder options,
         IConfiguration configuration,
@@ -58,6 +67,9 @@ public static class OpenIddictExtensions
         }
     }
 
+    /// <summary>
+    /// Imports Application from appsettings.json into OpenId database
+    /// </summary>
     public static async Task UseOpenIdDictApplicationsFromConfiguration(
         this IApplicationBuilder applicationBuilder
     )
@@ -67,7 +79,7 @@ public static class OpenIddictExtensions
         IOpenIddictApplicationManager manager =
             serviceProvider.GetRequiredService<IOpenIddictApplicationManager>();
         var configurationProvider =
-            serviceProvider.GetRequiredService<IOpenIddictConfigurationProvider>();
+            serviceProvider.GetRequiredService<IOpenIddictClientConfigurationProvider>();
 
         var clients = configurationProvider.GetAllConfigurations();
 
@@ -89,18 +101,26 @@ public static class OpenIddictExtensions
         }
     }
 
+    /// <summary>
+    /// Registers implementation of IOption&lt;OpenIddictConfiguration&gt; and IOpenIddictClientConfigurationProvider
+    /// </summary>
     public static void AddOpenIddictConfigurations(
         this IServiceCollection services,
         IConfiguration configuration,
         string configurationSection = "OpenId"
     )
     {
-        services.AddTransient<IOpenIddictConfigurationProvider, OpenIddictConfigurationProvider>();
+        services
+            .AddTransient<IOpenIddictClientConfigurationProvider,
+                OpenIddictClientConfigurationProvider>();
         services.Configure<OpenIddictConfiguration>(
             configuration.GetSection($"{configurationSection}")
         );
     }
 
+    /// <summary>
+    /// Configures OpenIddict to use Token and Authorization endpoints 
+    /// </summary>
     public static OpenIddictBuilder AddDefaultAuthorizationController(
         this OpenIddictBuilder openIddictBuilder
     )

@@ -9,8 +9,8 @@ public class AuthorizationController : OpenIdAuthorizationControllerBase<Identit
 {
     public AuthorizationController(SignInManager<IdentityUser> signInManager,
         UserManager<IdentityUser> userManager,
-        IOpenIddictConfigurationProvider configurationProvider) : base(signInManager, userManager,
-        configurationProvider)
+        IOpenIddictClientConfigurationProvider clientConfigurationProvider) : base(signInManager, userManager,
+        clientConfigurationProvider)
     {
     }
 
