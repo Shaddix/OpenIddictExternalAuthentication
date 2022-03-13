@@ -95,19 +95,19 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
             throw new ArgumentNullException(nameof(request));
         }
 
+        OpenIddictParameter? providerParameter = request["provider"];
+        if (providerParameter == null)
+        {
+            return Content("No external authentication provider was specified");
+        }
+        string provider = (string)providerParameter.Value!;
+
+        
         ExternalLoginInfo externalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
-        if (externalLoginInfo == null)
+        if (externalLoginInfo == null || externalLoginInfo.LoginProvider != provider)
         {
             // If an identity provider was explicitly specified, redirect
             // the user agent to the AccountController.ExternalLogin action.
-            OpenIddictParameter? providerParameter = request["provider"];
-            if (providerParameter == null)
-            {
-                return Content("No external authentication provider was specified");
-            }
-
-            var provider = (string)providerParameter.Value!;
-
             var redirectUrl = Url.Action(
                 nameof(ExternalCallback),
                 ControllerName,
