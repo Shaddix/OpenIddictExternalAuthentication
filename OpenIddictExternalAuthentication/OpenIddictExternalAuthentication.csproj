@@ -8,6 +8,7 @@
         <Authors>Artur Drobinskiy</Authors>
         <Description>OpenIddict extension to support Auth code flow fo built-in ASP.Net identity providers</Description>
         <RepositoryUrl>https://github.com/Shaddix/OpenIddictExternalAuthentication</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/Shaddix/OpenIddictExternalAuthentication</PackageProjectUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <RepositoryType>GitHub</RepositoryType>
         <AssemblyName>Shaddix.OpenIddict.ExternalAuthentication</AssemblyName>
