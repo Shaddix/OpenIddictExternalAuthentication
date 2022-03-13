@@ -31,7 +31,7 @@
     let _accessToken = '';
     const authCallbackPath = '/index.html?auth-callback=1';
     const scopes = 'offline_access';
-    const backendUri = `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
+    const backendUri = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' : ''}${window.location.port}`;
     const redirectUri = `${backendUri}${authCallbackPath}`;
     const clientId = 'web_client';
 

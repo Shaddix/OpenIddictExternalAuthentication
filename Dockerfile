@@ -5,4 +5,4 @@ WORKDIR /app
 EXPOSE 80
 COPY . .
 
-ENTRYPOINT dotnet OpenIddictExternalAuthentication.Example.dll
+ENTRYPOINT dotnet Shaddix.OpenIddict.ExternalAuthentication.Example.dll

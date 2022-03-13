@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <UserSecretsId>aspnet-IdentityOAuthSpaExtensions.Example-EF745C35-3F8F-485A-998C-150F352981C9</UserSecretsId>
+        <UserSecretsId>aspnet-OpenIddictExternalAuthentication.Example-EF745C35-3F8F-485A-998C-150F352981C9</UserSecretsId>
         <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
         <AssemblyName>Shaddix.OpenIddict.ExternalAuthentication.Example</AssemblyName>
         <RootNamespace>Shaddix.OpenIddict.ExternalAuthentication.Example</RootNamespace>
