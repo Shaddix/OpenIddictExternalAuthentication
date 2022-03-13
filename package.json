@@ -11,8 +11,8 @@
   "scripts": {
     "build-dotnet-version": "cross-env-shell dotnet publish OpenIddictExternalAuthentication.Example/OpenIddictExternalAuthentication.Example.csproj -c Release -o publish $VERSION",
     "build-dotnet": "rimraf publish && cross-env VERSION=\\\"/p:Version\\\"=\\\"$npm_package_version\\\" yarn build-dotnet-version",
-    "docker-build": "cross-env-shell docker build -t registry.gitlab.com/artur.drobinskiy/openiddict-external-authentication:latest -t registry.gitlab.com/artur.drobinskiy/identity-oauth-spa-extensions:$npm_package_version -f Dockerfile publish",
-    "docker-push": "cross-env-shell docker push registry.gitlab.com/artur.drobinskiy/openiddict-external-authentication:latest && cross-env-shell docker push registry.gitlab.com/artur.drobinskiy/openiddict-external-authentication:$npm_package_version",
+    "docker-build": "cross-env-shell docker build -t registry.gitlab.com/artur.drobinskiy/openiddictexternalauthentication:latest -t registry.gitlab.com/artur.drobinskiy/openiddictexternalauthentication:$npm_package_version -f Dockerfile publish",
+    "docker-push": "cross-env-shell docker push registry.gitlab.com/artur.drobinskiy/openiddictexternalauthentication:latest && cross-env-shell docker push registry.gitlab.com/artur.drobinskiy/openiddictexternalauthentication:$npm_package_version",
     "build": "yarn build-dotnet && yarn docker-build && yarn docker-push && yarn version --patch"
   }
 }

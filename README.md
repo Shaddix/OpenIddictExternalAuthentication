@@ -7,7 +7,7 @@ OpenIddict extension that allows adding *Login with Facebook* or *Login with Goo
 Based on [OpenIddict Samples](https://github.com/openiddict/openiddict-samples), and could be treated as another sample with JS client and external authentication providers.
 Implementation is based on Kevin Chalet answers on [SPA social login issue](https://github.com/openiddict/openiddict-core/issues/479#issuecomment-343681349).
 
-Here's the [demo](https://openiddict.arturdr.ru) if you care. The shown page uses vanilla JS, and has several buttons to log in via different providers.
+Here's the [demo](https://oauth.arturdr.ru) if you care. The shown page uses vanilla JS, and has several buttons to log in via different providers.
 ![Example workflow](example.gif)
 
 # How to
