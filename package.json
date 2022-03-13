@@ -1,6 +1,6 @@
 {
   "name": "@shaddix/openiddict-external-authentication-build",
-  "version": "0.1.26",
+  "version": "0.1.27",
   "private": true,
   "dependencies": {
     "concurrently": "5.2.0",
