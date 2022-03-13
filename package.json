@@ -1,18 +1,19 @@
 {
   "name": "@shaddix/openiddict-external-authentication-build",
-  "version": "0.1.25",
+  "version": "0.1.26",
   "private": true,
   "dependencies": {
     "concurrently": "5.2.0",
-    "copyfiles": "2.3.0",
+    "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
     "rimraf": "3.0.2"
   },
   "scripts": {
     "build-dotnet-version": "cross-env-shell dotnet publish OpenIddictExternalAuthentication.Example/OpenIddictExternalAuthentication.Example.csproj -c Release -o publish $VERSION",
     "build-dotnet": "rimraf publish && cross-env VERSION=\\\"/p:Version\\\"=\\\"$npm_package_version\\\" yarn build-dotnet-version",
+    "build-frontend": "yarn --cwd react-sample build && yarn copyfiles -u 2 \"react-sample/build/**/*\" \"publish/wwwroot/react\"",
     "docker-build": "cross-env-shell docker build -t registry.gitlab.com/artur.drobinskiy/openiddictexternalauthentication:latest -t registry.gitlab.com/artur.drobinskiy/openiddictexternalauthentication:$npm_package_version -f Dockerfile publish",
     "docker-push": "cross-env-shell docker push registry.gitlab.com/artur.drobinskiy/openiddictexternalauthentication:latest && cross-env-shell docker push registry.gitlab.com/artur.drobinskiy/openiddictexternalauthentication:$npm_package_version",
-    "build": "yarn build-dotnet && yarn docker-build && yarn docker-push && yarn version --patch"
+    "build": "yarn build-dotnet && yarn build-frontend && yarn docker-build && yarn docker-push && yarn version --patch"
   }
 }
