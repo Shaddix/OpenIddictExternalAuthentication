@@ -36,11 +36,12 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     /// SignInManager
     /// </summary>
     protected readonly SignInManager<TUser> _signInManager;
-    
+
     /// <summary>
     /// UserManager
     /// </summary>
     protected readonly UserManager<TUser> _userManager;
+
     private readonly IOpenIddictClientConfigurationProvider _clientConfigurationProvider;
 
     /// <summary>
@@ -83,11 +84,19 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     /// <summary>
     /// Implements authorize endpoint for Auth Code Flow
     /// </summary>
+    /// <param name="provider">name of external authentication provider (e.g. 'Google', 'Facebook', etc). Casing matters!</param>
+    /// <param name="reauthenticateWithAnotherProviderIfAlreadyLoggedIn">
+    /// Applicable in situations when user is already logged in with one of the external providers
+    /// (e.g. user tries to add another social account)
+    /// If true, user will be forced to login via passed provider (if it's different from the one User logged in before).
+    /// If false, user will be authenticated with existing external account (i.e. no login form will be shown). 
+    /// </param>
     [AllowAnonymous]
     [HttpGet("~/connect/authorize")]
     [HttpPost("~/connect/authorize")]
     [IgnoreAntiforgeryToken]
-    public virtual async Task<IActionResult> Authorize()
+    public virtual async Task<IActionResult> Authorize(string? provider,
+        bool reauthenticateWithAnotherProviderIfAlreadyLoggedIn = false)
     {
         OpenIddictRequest? request = HttpContext.GetOpenIddictServerRequest();
         if (request == null)
@@ -95,16 +104,16 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
             throw new ArgumentNullException(nameof(request));
         }
 
-        OpenIddictParameter? providerParameter = request["provider"];
-        if (providerParameter == null)
+        if (string.IsNullOrEmpty(provider))
         {
             return Content("No external authentication provider was specified");
         }
-        string provider = (string)providerParameter.Value!;
 
-        
+
         ExternalLoginInfo externalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
-        if (externalLoginInfo == null || externalLoginInfo.LoginProvider != provider)
+        if (externalLoginInfo == null ||
+            (reauthenticateWithAnotherProviderIfAlreadyLoggedIn &&
+             externalLoginInfo.LoginProvider != provider))
         {
             // If an identity provider was explicitly specified, redirect
             // the user agent to the AccountController.ExternalLogin action.
