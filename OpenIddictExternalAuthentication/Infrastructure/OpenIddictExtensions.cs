@@ -22,7 +22,8 @@ public static class OpenIddictExtensions
         string configurationPath = "OpenId:SigningCertificate"
     )
     {
-        var signingCertificate = configuration.GetValue<OpenIdCertificateInfo>(configurationPath);
+        var signingCertificate =
+            configuration.GetSection(configurationPath).Get<OpenIdCertificateInfo>();
         if (
             !string.IsNullOrEmpty(signingCertificate?.Password)
             && !string.IsNullOrEmpty(signingCertificate?.Base64Certificate)
@@ -48,9 +49,8 @@ public static class OpenIddictExtensions
         string configurationPath = "OpenId:EncryptionCertificate"
     )
     {
-        var encryptionCertificate = configuration.GetValue<OpenIdCertificateInfo>(
-            configurationPath
-        );
+        var encryptionCertificate =
+            configuration.GetSection(configurationPath).Get<OpenIdCertificateInfo>();
         if (
             !string.IsNullOrEmpty(encryptionCertificate?.Password)
             && !string.IsNullOrEmpty(encryptionCertificate?.Base64Certificate)
@@ -117,7 +117,7 @@ public static class OpenIddictExtensions
         services.Configure<OpenIddictConfiguration>(
             configuration.GetSection($"{configurationSection}")
         );
-        
+
         return openIddictBuilder;
     }
 
