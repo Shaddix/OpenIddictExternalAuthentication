@@ -16,7 +16,7 @@ public class OpenIddictClientConfigurationProvider : IOpenIddictClientConfigurat
     /// </summary>
     public OpenIddictClientConfigurationProvider(IOptions<OpenIddictConfiguration> configuration)
     {
-        _clients = configuration.Value.Clients.ToDictionary(x => x.ClientId);
+        _clients = configuration.Value.Clients.Values.ToDictionary(x => x.ClientId);
     }
 
     /// <inheritdoc />
