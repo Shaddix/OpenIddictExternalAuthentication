@@ -85,18 +85,18 @@ public static class OpenIddictExtensions
 
         foreach (var client in clients)
         {
-            var clientObject = await manager.FindByClientIdAsync(client.ClientId!);
+            var clientObject = await manager.FindByClientIdAsync(client.ClientId!).ConfigureAwait(false);
             // See OpenIddictConstants.Permissions for available permissions
 
             if (clientObject is null)
             {
-                await manager.CreateAsync(client);
+                await manager.CreateAsync(client).ConfigureAwait(false);
             }
             else
             {
                 client.Type ??= "public";
-                await manager.PopulateAsync(clientObject, client);
-                await manager.UpdateAsync(clientObject);
+                await manager.PopulateAsync(clientObject, client).ConfigureAwait(false);
+                await manager.UpdateAsync(clientObject).ConfigureAwait(false);
             }
         }
     }
