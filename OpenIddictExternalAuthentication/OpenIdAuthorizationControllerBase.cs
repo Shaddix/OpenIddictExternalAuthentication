@@ -16,6 +16,7 @@ using IdentityModel;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
@@ -106,10 +107,9 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
 
         if (string.IsNullOrEmpty(provider))
         {
-            return Content("No external authentication provider was specified");
+            return await AuthorizeUsingDefaultSettings(request, IdentityConstants.ApplicationScheme);
         }
-
-
+        
         ExternalLoginInfo externalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
         if (externalLoginInfo == null ||
             (reauthenticateWithAnotherProviderIfAlreadyLoggedIn &&
@@ -156,6 +156,51 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
         {
             return BadRequest();
         }
+    }
+
+    /// <summary>
+    /// Tries to authorize the user user built-in method without using any specific provider.
+    /// Usually this means showing an authentication form.
+    /// </summary>
+    protected virtual async Task<IActionResult> AuthorizeUsingDefaultSettings(
+        OpenIddictRequest openIddictRequest, string scheme)
+    {
+        var info = await HttpContext.AuthenticateAsync(scheme);
+
+        if (!info.Succeeded)
+        {
+            var parameters = Request.HasFormContentType
+                ? Request.Form
+                    .Where(parameter => parameter.Key != Parameters.Prompt)
+                    .ToList()
+                : Request.Query
+                    .Where(parameter => parameter.Key != Parameters.Prompt)
+                    .ToList();
+
+            // redirect to authentication
+            return Challenge(
+                authenticationSchemes: scheme,
+                properties: new AuthenticationProperties
+                {
+                    RedirectUri =
+                        Request.PathBase + Request.Path + QueryString.Create(parameters)
+                }
+            );
+        }
+
+        // Retrieve the user profile corresponding to the refresh token.
+        // Note: if you want to automatically invalidate the refresh token
+        // when the user password/roles change, use the following line instead:
+        // var user = _signInManager.ValidateSecurityStampAsync(info.Principal);
+        var user = await _userManager.GetUserAsync(info.Principal);
+
+        // Ensure the user is still allowed to sign in.
+        if (!await _signInManager.CanSignInAsync(user))
+        {
+            return StandardError();
+        }
+
+        return await SignInUser(user, openIddictRequest);
     }
 
     /// <summary>
@@ -208,7 +253,7 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
 
             return await SignInUser(user, request);
         }
-        else if (request.IsRefreshTokenGrantType())
+        else if (request.IsRefreshTokenGrantType() || request.IsDeviceCodeGrantType())
         {
             // Retrieve the claims principal stored in the refresh token.
             var info = await HttpContext.AuthenticateAsync(
@@ -222,7 +267,18 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
             var user = await _userManager.GetUserAsync(info.Principal);
             if (user == null)
             {
-                return Error("refresh_token_invalid");
+                if (request.IsRefreshTokenGrantType())
+                {
+                    return Error("refresh_token_invalid");
+                }
+                else if (request.IsDeviceCodeGrantType())
+                {
+                    return Error("device_code_invalid");
+                }
+                else
+                {
+                    return Error("token_invalid");
+                }
             }
 
             // Ensure the user is still allowed to sign in.
