@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>1.1.4</PackageVersion>
+        <PackageVersion>1.2.1</PackageVersion>
         <Title>Shaddix.OpenIddict.ExternalAuthentication</Title>
         <Authors>Artur Drobinskiy</Authors>
         <Description>OpenIddict extension to support Auth code flow fo built-in ASP.Net identity providers</Description>
@@ -16,7 +16,7 @@
         <RootNamespace>Shaddix.OpenIddict.ExternalAuthentication</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
-        <None Include="..\README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
         <DebugSymbols>true</DebugSymbols>
@@ -25,10 +25,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="OpenIddict.AspNetCore" Version="3.1.1"/>
-        <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.0"/>
-        <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="6.0.0"/>
-        <PackageReference Include="IdentityModel" Version="6.0.0"/>
+        <PackageReference Include="OpenIddict.AspNetCore" Version="3.1.1" />
+        <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="6.0.0" />
+        <PackageReference Include="IdentityModel" Version="6.0.0" />
     </ItemGroup>
 
 </Project>

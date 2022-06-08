@@ -85,7 +85,8 @@ public static class OpenIddictExtensions
 
         foreach (var client in clients)
         {
-            var clientObject = await manager.FindByClientIdAsync(client.ClientId!).ConfigureAwait(false);
+            var clientObject =
+                await manager.FindByClientIdAsync(client.ClientId!).ConfigureAwait(false);
             // See OpenIddictConstants.Permissions for available permissions
 
             if (clientObject is null)
@@ -125,27 +126,51 @@ public static class OpenIddictExtensions
     /// Configures OpenIddict to use Token and Authorization endpoints 
     /// </summary>
     public static OpenIddictBuilder AddDefaultAuthorizationController(
-        this OpenIddictBuilder openIddictBuilder
+        this OpenIddictBuilder openIddictBuilder,
+        Action<OpenIddictSettings>? configuration = null
     )
     {
         return openIddictBuilder.AddServer(
             options =>
             {
-                // Enable the token endpoint.
+                var settings = new OpenIddictSettings(options);
+                configuration?.Invoke(settings);
+                
                 options.SetTokenEndpointUris("/connect/token");
                 options
-                    .AllowAuthorizationCodeFlow()
-                    .RequireProofKeyForCodeExchange()
-                    .SetAuthorizationEndpointUris("/connect/authorize");
-
-                // Enable the password flow.
-                options.AllowPasswordFlow();
-                options.AllowRefreshTokenFlow();
-
-                options
                     .UseAspNetCore()
-                    .EnableTokenEndpointPassthrough()
-                    .EnableAuthorizationEndpointPassthrough();
+                    .EnableTokenEndpointPassthrough();
+                    
+                
+                if (!settings.IsLogoutEndpointDisabled)
+                {
+                    options.SetLogoutEndpointUris("/connect/logout");
+                    options
+                        .UseAspNetCore()
+                        .EnableLogoutEndpointPassthrough();
+                }
+
+                if (!settings.IsAuthorizeFlowDisabled)
+                {
+                    options
+                        .AllowAuthorizationCodeFlow()
+                        .RequireProofKeyForCodeExchange()
+                        .SetAuthorizationEndpointUris("/connect/authorize");
+
+                    options
+                        .UseAspNetCore()
+                        .EnableAuthorizationEndpointPassthrough();
+                }
+
+                if (settings.IsPasswordFlowAllowed)
+                {
+                    options.AllowPasswordFlow();    
+                }
+
+                if (!settings.IsRefreshTokenFlowDisabled)
+                {
+                    options.AllowRefreshTokenFlow();
+                }
             }
         );
     }
