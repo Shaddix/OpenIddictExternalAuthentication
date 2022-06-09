@@ -70,7 +70,8 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     /// <returns></returns>
     [HttpGet("~/connect/logout")]
     [ActionName(nameof(Logout)), HttpPost("~/connect/logout")]
-    public async Task<IActionResult> Logout()
+    [AllowAnonymous]
+    public virtual async Task<IActionResult> Logout()
     {
         // Ask ASP.NET Core Identity to delete the local and external cookies created
         // when the user agent is redirected from the external identity provider
