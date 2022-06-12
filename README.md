@@ -3,11 +3,18 @@
 [![MIT](https://img.shields.io/dub/l/vibe-d.svg)](https://opensource.org/licenses/MIT)
 [![NET6](https://img.shields.io/badge/-.NET%206.0-blueviolet)](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
 
-OpenIddict extension that allows adding *Login with Facebook* or *Login with Google* buttons into your React/Angular/PlainJS/whatever SPA (implying you are using OpenIddict on backend).
-Based on [OpenIddict Samples](https://github.com/openiddict/openiddict-samples), and could be treated as another sample with JS client and external authentication providers.
-Implementation is based on Kevin Chalet answers on [SPA social login issue](https://github.com/openiddict/openiddict-core/issues/479#issuecomment-343681349).
+Library that simplifies integration of [OpenIdDict](https://github.com/openiddict/openiddict-core) to a several lines of code.
+It contain basic implementation of `AuthenticationController`, mostly taken from [OpenIddict Samples](https://github.com/openiddict/openiddict-samples).
 
-Here's the [vanilla js](https://oauth.arturdr.ru) or [react](https://oauth.arturdr.ru/react) demo if you care. The page has several buttons to log in via different providers.
+## What's inside
+1. Required endpoints to support 3rd party authentication (e.g. Google, Facebook, etc.)
+2. JWT access_token/refresh_token generation (i.e. default `/connect/token` endpoint)
+3. Refresh token flow
+4. Authorization Code flow
+5. Resource Owner Password Flow (disabled by default, could be enabled via configuration)
+
+Here's the [vanilla js](https://oauth.arturdr.ru) or [react](https://oauth.arturdr.ru/react) demo of Google/Facebook authentication using OpenIddict on backend.
+The page has several buttons to log in via different providers.
 ![Example workflow](example.gif)
 
 # How to
@@ -18,7 +25,7 @@ Here's the [vanilla js](https://oauth.arturdr.ru) or [react](https://oauth.artur
     dotnet add package Shaddix.OpenIddict.ExternalAuthentication
    ```
 
-4. Create you own `AuthorizationController` by inheriting from `OpenIdAuthorizationControllerBase`. This could look like:
+3. Create you own `AuthorizationController` by inheriting from `OpenIdAuthorizationControllerBase`. This could look like:
    ```csharp
    public class AuthorizationController : OpenIdAuthorizationControllerBase<IdentityUser, string>
    {
@@ -31,15 +38,25 @@ Here's the [vanilla js](https://oauth.arturdr.ru) or [react](https://oauth.artur
 
    }
    ```
-5. Override some functions (e.g. `CreateNewUser` or `GetClaims`) if you want to customize user creation behavior or provide more claims.
-6. From `Configure` function in `Startup.cs` add the following calls (in addition to standard OpenIddict setup):
-   ```c#
+4. Override some functions (e.g. `CreateNewUser` or `GetClaims`) if you want to customize user creation behavior or provide more claims.
+5. From `Configure` function in `Startup.cs` add the following calls (in addition to standard OpenIddict setup):
+   ```csharp
    services
       .AddOpenIddict()
       .AddOpenIddictConfigurations(Configuration)
       .AddDefaultAuthorizationController()
    ```
-7. Add external auth providers (i.e. `.AddAuthentication().AddGoogle()`, `.AddFacebook()`, etc.). Follow instructions on how to set up applications on [OAuth provider side](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/social/facebook-logins?view=aspnetcore-5.0).
+   You could customize default authorization controller configuration (or even default OpenIddict configuration) by doing:
+   ```
+   .AddDefaultAuthorizationController(options => 
+                    options.DisableRefreshTokenFlow())
+   ```
+   or
+   ```
+   .AddDefaultAuthorizationController(options =>
+                    options.OpenIddictServerBuilder.AllowNoneFlow())
+   ```
+8. Add external auth providers (i.e. `.AddAuthentication().AddGoogle()`, `.AddFacebook()`, etc.). Follow instructions on how to set up applications on [OAuth provider side](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/social/facebook-logins?view=aspnetcore-5.0).
 
 You could also take a look at [OpenIddictExternalAuthentication.Example](OpenIddictExternalAuthentication.Example) for example usage (keep in mind, that there are hardcoded ClientId/ClientSecret for FB and Google within Example app. They are for demo purposes and everyone can use them, so beware).
 
