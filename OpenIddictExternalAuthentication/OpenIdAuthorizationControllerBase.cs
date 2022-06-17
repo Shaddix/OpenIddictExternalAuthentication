@@ -51,7 +51,7 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     protected virtual string ControllerName => GetType().Name.Replace("Controller", "");
 
     /// <summary>
-    /// Constructor for OpenIdAuthorizationControllerBase 
+    /// Constructor for OpenIdAuthorizationControllerBase
     /// </summary>
     protected OpenIdAuthorizationControllerBase(
         SignInManager<TUser> signInManager,
@@ -86,7 +86,7 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
             properties: new AuthenticationProperties { RedirectUri = "/" }
         );
     }
-    
+
     /// <summary>
     /// Implements endpoint that external authentication should redirect to
     /// </summary>
@@ -113,14 +113,16 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     /// Applicable in situations when user is already logged in with one of the external providers
     /// (e.g. user tries to add another social account)
     /// If true, user will be forced to login via passed provider (if it's different from the one User logged in before).
-    /// If false, user will be authenticated with existing external account (i.e. no login form will be shown). 
+    /// If false, user will be authenticated with existing external account (i.e. no login form will be shown).
     /// </param>
     [AllowAnonymous]
     [HttpGet("~/connect/authorize")]
     [HttpPost("~/connect/authorize")]
     [IgnoreAntiforgeryToken]
-    public virtual async Task<IActionResult> Authorize(string? provider,
-        bool reauthenticateWithAnotherProviderIfAlreadyLoggedIn = false)
+    public virtual async Task<IActionResult> Authorize(
+        string? provider,
+        bool reauthenticateWithAnotherProviderIfAlreadyLoggedIn = false
+    )
     {
         OpenIddictRequest? request = HttpContext.GetOpenIddictServerRequest();
         if (request == null)
@@ -130,13 +132,20 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
 
         if (string.IsNullOrEmpty(provider))
         {
-            return await AuthorizeUsingDefaultSettings(request, IdentityConstants.ApplicationScheme);
+            return await AuthorizeUsingDefaultSettings(
+                request,
+                IdentityConstants.ApplicationScheme
+            );
         }
-        
+
         ExternalLoginInfo externalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
-        if (externalLoginInfo == null ||
-            (reauthenticateWithAnotherProviderIfAlreadyLoggedIn &&
-             externalLoginInfo.LoginProvider != provider))
+        if (
+            externalLoginInfo == null
+            || (
+                reauthenticateWithAnotherProviderIfAlreadyLoggedIn
+                && externalLoginInfo.LoginProvider != provider
+            )
+        )
         {
             // If an identity provider was explicitly specified, redirect
             // the user agent to the AccountController.ExternalLogin action.
@@ -186,27 +195,24 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     /// Usually this means showing an authentication form.
     /// </summary>
     protected virtual async Task<IActionResult> AuthorizeUsingDefaultSettings(
-        OpenIddictRequest openIddictRequest, string scheme)
+        OpenIddictRequest openIddictRequest,
+        string scheme
+    )
     {
         var info = await HttpContext.AuthenticateAsync(scheme);
 
         if (!info.Succeeded)
         {
             var parameters = Request.HasFormContentType
-                ? Request.Form
-                    .Where(parameter => parameter.Key != Parameters.Prompt)
-                    .ToList()
-                : Request.Query
-                    .Where(parameter => parameter.Key != Parameters.Prompt)
-                    .ToList();
+                ? Request.Form.Where(parameter => parameter.Key != Parameters.Prompt).ToList()
+                : Request.Query.Where(parameter => parameter.Key != Parameters.Prompt).ToList();
 
             // redirect to authentication
             return Challenge(
                 authenticationSchemes: scheme,
                 properties: new AuthenticationProperties
                 {
-                    RedirectUri =
-                        Request.PathBase + Request.Path + QueryString.Create(parameters)
+                    RedirectUri = Request.PathBase + Request.Path + QueryString.Create(parameters)
                 }
             );
         }
@@ -377,8 +383,10 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
         var principal = await _signInManager.CreateUserPrincipalAsync(user);
         if (
             !string.IsNullOrEmpty(request.ClientId)
-            && _clientConfigurationProvider.TryGetConfiguration(request.ClientId,
-                out var configuration)
+            && _clientConfigurationProvider.TryGetConfiguration(
+                request.ClientId,
+                out var configuration
+            )
         )
         {
             if (configuration.RefreshTokenLifetime != null)
@@ -396,7 +404,7 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
             }
         }
 
-        await AddClaims(principal, user);
+        await AddClaims(principal, user, request);
 
         var scopes = request.GetScopes();
         principal.SetScopes(scopes);
@@ -438,9 +446,13 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     /// Override this function if you want to remove/modify some pre-added claims.
     /// If you just want to add more claims, consider overriding <see cref="GetClaims"/>
     /// </summary>
-    protected virtual async Task AddClaims(ClaimsPrincipal principal, TUser user)
+    protected virtual async Task AddClaims(
+        ClaimsPrincipal principal,
+        TUser user,
+        OpenIddictRequest openIddictRequest
+    )
     {
-        IList<Claim> claims = await GetClaims(user);
+        IList<Claim> claims = await GetClaims(user, openIddictRequest);
 
         ClaimsIdentity claimIdentity = principal.Identities.First();
         claimIdentity.AddClaims(claims);
@@ -450,18 +462,20 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     /// Returns claims that will be added to the user's principal (and later to JWT token).
     /// Consider overriding this function if you want to add more claims.
     /// </summary>
-    protected virtual Task<IList<Claim>> GetClaims(TUser user)
+    protected virtual Task<IList<Claim>> GetClaims(TUser user, OpenIddictRequest openIddictRequest)
     {
-        return Task.FromResult(new List<Claim>()
-        {
-            new(JwtClaimTypes.NickName, user.UserName),
-            new(JwtClaimTypes.Id, user.Id.ToString() ?? string.Empty),
-            new(JwtClaimTypes.Subject, user.Id.ToString() ?? string.Empty),
-        } as IList<Claim>);
+        return Task.FromResult(
+            new List<Claim>()
+            {
+                new(JwtClaimTypes.NickName, user.UserName),
+                new(JwtClaimTypes.Id, user.Id.ToString() ?? string.Empty),
+                new(JwtClaimTypes.Subject, user.Id.ToString() ?? string.Empty),
+            } as IList<Claim>
+        );
     }
 
     /// <summary>
-    /// Returns destinations to which a certain claim could be returned 
+    /// Returns destinations to which a certain claim could be returned
     /// </summary>
     protected virtual IEnumerable<string> GetDestinations(Claim claim, ClaimsPrincipal principal)
     {
