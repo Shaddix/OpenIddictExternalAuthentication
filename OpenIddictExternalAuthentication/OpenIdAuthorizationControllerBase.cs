@@ -109,20 +109,11 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     /// Implements authorize endpoint for Auth Code Flow
     /// </summary>
     /// <param name="provider">name of external authentication provider (e.g. 'Google', 'Facebook', etc). Casing matters!</param>
-    /// <param name="reauthenticateWithAnotherProviderIfAlreadyLoggedIn">
-    /// Applicable in situations when user is already logged in with one of the external providers
-    /// (e.g. user tries to add another social account)
-    /// If true, user will be forced to login via passed provider (if it's different from the one User logged in before).
-    /// If false, user will be authenticated with existing external account (i.e. no login form will be shown).
-    /// </param>
     [AllowAnonymous]
     [HttpGet("~/connect/authorize")]
     [HttpPost("~/connect/authorize")]
     [IgnoreAntiforgeryToken]
-    public virtual async Task<IActionResult> Authorize(
-        string? provider,
-        bool reauthenticateWithAnotherProviderIfAlreadyLoggedIn = false
-    )
+    public virtual async Task<IActionResult> Authorize(string? provider)
     {
         OpenIddictRequest? request = HttpContext.GetOpenIddictServerRequest();
         if (request == null)
@@ -141,10 +132,7 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
         ExternalLoginInfo externalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
         if (
             externalLoginInfo == null
-            || (
-                reauthenticateWithAnotherProviderIfAlreadyLoggedIn
-                && externalLoginInfo.LoginProvider != provider
-            )
+            || (request.HasPrompt(Prompts.Login) && externalLoginInfo.LoginProvider != provider)
         )
         {
             // If an identity provider was explicitly specified, redirect
@@ -195,13 +183,21 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     /// Usually this means showing an authentication form.
     /// </summary>
     protected virtual async Task<IActionResult> AuthorizeUsingDefaultSettings(
-        OpenIddictRequest openIddictRequest,
+        OpenIddictRequest request,
         string scheme
     )
     {
-        var info = await HttpContext.AuthenticateAsync(scheme);
+        // var forcePrompt = false;
+        // var info = await HttpContext.AuthenticateAsync(scheme);
 
-        if (!info.Succeeded)
+        var forcePrompt = request.HasPrompt(Prompts.Login);
+        AuthenticateResult? info = null;
+        if (!forcePrompt)
+        {
+            info = await HttpContext.AuthenticateAsync(scheme);
+        }
+
+        if (forcePrompt || !info.Succeeded)
         {
             var parameters = Request.HasFormContentType
                 ? Request.Form.Where(parameter => parameter.Key != Parameters.Prompt).ToList()
@@ -229,7 +225,7 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
             return StandardError();
         }
 
-        return await SignInUser(user, openIddictRequest);
+        return await SignInUser(user, request);
     }
 
     /// <summary>

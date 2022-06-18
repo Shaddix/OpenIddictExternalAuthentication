@@ -8,6 +8,7 @@
 <div>
     <div>
         <h1>Sign-in via OAuth</h1>
+        <button onclick="signInVia('')">Internal</button>
         <button onclick="signInVia('Google')">Google</button>
         <button onclick="signInVia('Facebook')">Facebook</button>
         <button onclick="signInVia('Microsoft')">Microsoft</button>
@@ -88,6 +89,7 @@
         try {
             const user = await userManager.signinPopup({
                 extraQueryParams: {provider: provider},
+                prompt: 'login'
             });
 
             return user;
