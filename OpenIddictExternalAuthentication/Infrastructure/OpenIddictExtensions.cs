@@ -83,9 +83,9 @@ public static class OpenIddictExtensions
 
         var clients = configurationProvider.GetAllConfigurations();
 
-        foreach (var client in clients)
+        foreach (OpenIddictClientConfiguration client in clients)
         {
-            var clientObject =
+            object clientObject =
                 await manager.FindByClientIdAsync(client.ClientId!).ConfigureAwait(false);
             // See OpenIddictConstants.Permissions for available permissions
 

@@ -187,9 +187,6 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
         string scheme
     )
     {
-        // var forcePrompt = false;
-        // var info = await HttpContext.AuthenticateAsync(scheme);
-
         var forcePrompt = request.HasPrompt(Prompts.Login);
         AuthenticateResult? info = null;
         if (!forcePrompt)
