@@ -190,7 +190,10 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
                 }
             });
 
-            app.UseOpenIdDictApplicationsFromConfiguration();
+            var publicUrl = Configuration.GetSection("Auth").GetValue<string>("PublicHost");
+            app.UseOpenIdDictApplicationsFromConfiguration(
+                options => options.SetPublicUrl(publicUrl)
+            );
 
             CreateUser(app).GetAwaiter().GetResult();
         }

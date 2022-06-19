@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -77,10 +79,17 @@ public static class OpenIddictExtensions
     /// Imports Application from appsettings.json into OpenId database
     /// </summary>
     public static IApplicationBuilder UseOpenIdDictApplicationsFromConfiguration(
-        this IApplicationBuilder applicationBuilder
+        this IApplicationBuilder applicationBuilder,
+        Action<ApplicationsFromConfigurationOptions> configureOptions = null
     )
     {
-        Task.Run(() => UseOpenIdDictApplicationsFromConfigurationAsync(applicationBuilder))
+        Task.Run(
+                () =>
+                    UseOpenIdDictApplicationsFromConfigurationAsync(
+                        applicationBuilder,
+                        configureOptions
+                    )
+            )
             .GetAwaiter()
             .GetResult();
 
@@ -91,9 +100,13 @@ public static class OpenIddictExtensions
     /// Imports Application from appsettings.json into OpenId database
     /// </summary>
     public static async Task UseOpenIdDictApplicationsFromConfigurationAsync(
-        this IApplicationBuilder applicationBuilder
+        this IApplicationBuilder applicationBuilder,
+        Action<ApplicationsFromConfigurationOptions> configureOptions = null
     )
     {
+        var options = new ApplicationsFromConfigurationOptions();
+        configureOptions?.Invoke(options);
+
         using IServiceScope scope = applicationBuilder.ApplicationServices.CreateScope();
         IServiceProvider serviceProvider = scope.ServiceProvider;
         IOpenIddictApplicationManager manager =
@@ -102,9 +115,14 @@ public static class OpenIddictExtensions
             serviceProvider.GetRequiredService<IOpenIddictClientConfigurationProvider>();
 
         var clients = configurationProvider.GetAllConfigurations();
-
         foreach (OpenIddictClientConfiguration client in clients)
         {
+            if (!string.IsNullOrEmpty(options.PublicUrl))
+            {
+                var baseUri = new Uri(options.PublicUrl);
+                PrependBaseUriToRelativeUris(client.RedirectUris, baseUri);
+                PrependBaseUriToRelativeUris(client.PostLogoutRedirectUris, baseUri);
+            }
             object clientObject = await manager
                 .FindByClientIdAsync(client.ClientId!)
                 .ConfigureAwait(false);
@@ -120,6 +138,19 @@ public static class OpenIddictExtensions
                 await manager.PopulateAsync(clientObject, client).ConfigureAwait(false);
                 await manager.UpdateAsync(clientObject).ConfigureAwait(false);
             }
+        }
+    }
+
+    private static void PrependBaseUriToRelativeUris(HashSet<Uri> uris, Uri baseUri)
+    {
+        if (uris == null)
+            return;
+
+        List<Uri> relativeUris = uris.Where(x => !x.IsAbsoluteUri).ToList();
+        foreach (var relativeUri in relativeUris)
+        {
+            uris.Remove(relativeUri);
+            uris.Add(new Uri(baseUri, relativeUri));
         }
     }
 
