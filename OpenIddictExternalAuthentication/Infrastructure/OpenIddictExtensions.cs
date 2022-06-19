@@ -14,16 +14,17 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 public static class OpenIddictExtensions
 {
     /// <summary>
-    /// Configures openiddict with signing certificate from appsettings.json 
+    /// Configures openiddict with signing certificate from appsettings.json
     /// </summary>
-    public static void AddSigningCertificateFromConfiguration(
+    public static OpenIddictServerBuilder AddSigningCertificateFromConfiguration(
         this OpenIddictServerBuilder options,
         IConfiguration configuration,
         string configurationPath = "OpenId:SigningCertificate"
     )
     {
-        var signingCertificate =
-            configuration.GetSection(configurationPath).Get<OpenIdCertificateInfo>();
+        var signingCertificate = configuration
+            .GetSection(configurationPath)
+            .Get<OpenIdCertificateInfo>();
         if (
             !string.IsNullOrEmpty(signingCertificate?.Password)
             && !string.IsNullOrEmpty(signingCertificate?.Base64Certificate)
@@ -38,19 +39,22 @@ public static class OpenIddictExtensions
         {
             options.AddDevelopmentSigningCertificate();
         }
+
+        return options;
     }
 
     /// <summary>
-    /// Configures openiddict with encryption certificate from appsettings.json 
+    /// Configures openiddict with encryption certificate from appsettings.json
     /// </summary>
-    public static void AddEncryptionCertificateFromConfiguration(
+    public static OpenIddictServerBuilder AddEncryptionCertificateFromConfiguration(
         this OpenIddictServerBuilder options,
         IConfiguration configuration,
         string configurationPath = "OpenId:EncryptionCertificate"
     )
     {
-        var encryptionCertificate =
-            configuration.GetSection(configurationPath).Get<OpenIdCertificateInfo>();
+        var encryptionCertificate = configuration
+            .GetSection(configurationPath)
+            .Get<OpenIdCertificateInfo>();
         if (
             !string.IsNullOrEmpty(encryptionCertificate?.Password)
             && !string.IsNullOrEmpty(encryptionCertificate?.Base64Certificate)
@@ -65,12 +69,28 @@ public static class OpenIddictExtensions
         {
             options.AddDevelopmentEncryptionCertificate();
         }
+
+        return options;
     }
 
     /// <summary>
     /// Imports Application from appsettings.json into OpenId database
     /// </summary>
-    public static async Task UseOpenIdDictApplicationsFromConfiguration(
+    public static IApplicationBuilder UseOpenIdDictApplicationsFromConfiguration(
+        this IApplicationBuilder applicationBuilder
+    )
+    {
+        Task.Run(() => UseOpenIdDictApplicationsFromConfigurationAsync(applicationBuilder))
+            .GetAwaiter()
+            .GetResult();
+
+        return applicationBuilder;
+    }
+
+    /// <summary>
+    /// Imports Application from appsettings.json into OpenId database
+    /// </summary>
+    public static async Task UseOpenIdDictApplicationsFromConfigurationAsync(
         this IApplicationBuilder applicationBuilder
     )
     {
@@ -85,8 +105,9 @@ public static class OpenIddictExtensions
 
         foreach (OpenIddictClientConfiguration client in clients)
         {
-            object clientObject =
-                await manager.FindByClientIdAsync(client.ClientId!).ConfigureAwait(false);
+            object clientObject = await manager
+                .FindByClientIdAsync(client.ClientId!)
+                .ConfigureAwait(false);
             // See OpenIddictConstants.Permissions for available permissions
 
             if (clientObject is null)
@@ -112,9 +133,10 @@ public static class OpenIddictExtensions
     )
     {
         IServiceCollection services = openIddictBuilder.Services;
-        services
-            .AddTransient<IOpenIddictClientConfigurationProvider,
-                OpenIddictClientConfigurationProvider>();
+        services.AddTransient<
+            IOpenIddictClientConfigurationProvider,
+            OpenIddictClientConfigurationProvider
+        >();
         services.Configure<OpenIddictConfiguration>(
             configuration.GetSection($"{configurationSection}")
         );
@@ -123,55 +145,46 @@ public static class OpenIddictExtensions
     }
 
     /// <summary>
-    /// Configures OpenIddict to use Token and Authorization endpoints 
+    /// Configures OpenIddict to use Token and Authorization endpoints
     /// </summary>
     public static OpenIddictBuilder AddDefaultAuthorizationController(
         this OpenIddictBuilder openIddictBuilder,
         Action<OpenIddictSettings>? configuration = null
     )
     {
-        return openIddictBuilder.AddServer(
-            options =>
+        return openIddictBuilder.AddServer(options =>
+        {
+            var settings = new OpenIddictSettings(options);
+            configuration?.Invoke(settings);
+
+            options.SetTokenEndpointUris("/connect/token");
+            options.UseAspNetCore().EnableTokenEndpointPassthrough();
+
+            if (!settings.IsLogoutEndpointDisabled)
             {
-                var settings = new OpenIddictSettings(options);
-                configuration?.Invoke(settings);
-                
-                options.SetTokenEndpointUris("/connect/token");
-                options
-                    .UseAspNetCore()
-                    .EnableTokenEndpointPassthrough();
-                    
-                
-                if (!settings.IsLogoutEndpointDisabled)
-                {
-                    options.SetLogoutEndpointUris("/connect/logout");
-                    options
-                        .UseAspNetCore()
-                        .EnableLogoutEndpointPassthrough();
-                }
-
-                if (!settings.IsAuthorizeFlowDisabled)
-                {
-                    options
-                        .AllowAuthorizationCodeFlow()
-                        .RequireProofKeyForCodeExchange()
-                        .SetAuthorizationEndpointUris("/connect/authorize");
-
-                    options
-                        .UseAspNetCore()
-                        .EnableAuthorizationEndpointPassthrough();
-                }
-
-                if (settings.IsPasswordFlowAllowed)
-                {
-                    options.AllowPasswordFlow();    
-                }
-
-                if (!settings.IsRefreshTokenFlowDisabled)
-                {
-                    options.AllowRefreshTokenFlow();
-                }
+                options.SetLogoutEndpointUris("/connect/logout");
+                options.UseAspNetCore().EnableLogoutEndpointPassthrough();
             }
-        );
+
+            if (!settings.IsAuthorizeFlowDisabled)
+            {
+                options
+                    .AllowAuthorizationCodeFlow()
+                    .RequireProofKeyForCodeExchange()
+                    .SetAuthorizationEndpointUris("/connect/authorize");
+
+                options.UseAspNetCore().EnableAuthorizationEndpointPassthrough();
+            }
+
+            if (settings.IsPasswordFlowAllowed)
+            {
+                options.AllowPasswordFlow();
+            }
+
+            if (!settings.IsRefreshTokenFlowDisabled)
+            {
+                options.AllowRefreshTokenFlow();
+            }
+        });
     }
 }
