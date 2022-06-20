@@ -215,7 +215,10 @@ public static class OpenIddictExtensions
 
             if (settings.IsDeviceCodeFlowAllowed)
             {
-                options.AllowDeviceCodeFlow().SetVerificationEndpointUris("/connect/verify");
+                options
+                    .AllowDeviceCodeFlow()
+                    .SetDeviceEndpointUris("/connect/device")
+                    .SetVerificationEndpointUris("/connect/verify");
                 options.UseAspNetCore().EnableVerificationEndpointPassthrough();
             }
 
