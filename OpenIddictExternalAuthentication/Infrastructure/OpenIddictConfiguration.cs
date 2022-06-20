@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using OpenIddict.Abstractions;
 
 namespace Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 
@@ -12,20 +11,12 @@ public class OpenIddictConfiguration
     /// OpenId clients to be registered in openiddict
     /// </summary>
     public Dictionary<string, OpenIddictClientConfiguration> Clients { get; set; }
-}
 
-/// <summary>
-/// Configuration of a single Client
-/// </summary>
-public class OpenIddictClientConfiguration : OpenIddictApplicationDescriptor
-{
-    /// <summary>
-    /// Lifetime of an access token in seconds (3600 by default)
-    /// </summary>
-    public int? AccessTokenLifetime { get; set; }
+    public OpenIdCertificateInfo SigningCertificate { get; set; }
+    public OpenIdCertificateInfo EncryptionCertificate { get; set; }
 
     /// <summary>
-    /// Rolling lifetime of a refresh token in seconds (14 days by default)
+    /// Public URL to be able to use relative URLs in Client's RedirectUri
     /// </summary>
-    public int? RefreshTokenLifetime { get; set; }
+    public string PublicUrl { get; set; }
 }

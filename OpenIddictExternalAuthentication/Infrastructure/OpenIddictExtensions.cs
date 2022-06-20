@@ -20,13 +20,21 @@ public static class OpenIddictExtensions
     /// </summary>
     public static OpenIddictServerBuilder AddSigningCertificateFromConfiguration(
         this OpenIddictServerBuilder options,
-        IConfiguration configuration,
-        string configurationPath = "OpenId:SigningCertificate"
+        IConfiguration configuration
     )
     {
-        var signingCertificate = configuration
-            .GetSection(configurationPath)
-            .Get<OpenIdCertificateInfo>();
+        var signingCertificate = configuration.Get<OpenIdCertificateInfo>();
+        return options.AddSigningCertificate(signingCertificate);
+    }
+
+    /// <summary>
+    /// Configures openiddict with signing certificate
+    /// </summary>
+    public static OpenIddictServerBuilder AddSigningCertificate(
+        this OpenIddictServerBuilder options,
+        OpenIdCertificateInfo signingCertificate
+    )
+    {
         if (
             !string.IsNullOrEmpty(signingCertificate?.Password)
             && !string.IsNullOrEmpty(signingCertificate?.Base64Certificate)
@@ -50,13 +58,21 @@ public static class OpenIddictExtensions
     /// </summary>
     public static OpenIddictServerBuilder AddEncryptionCertificateFromConfiguration(
         this OpenIddictServerBuilder options,
-        IConfiguration configuration,
-        string configurationPath = "OpenId:EncryptionCertificate"
+        IConfiguration configuration
     )
     {
-        var encryptionCertificate = configuration
-            .GetSection(configurationPath)
-            .Get<OpenIdCertificateInfo>();
+        OpenIdCertificateInfo encryptionCertificate = configuration.Get<OpenIdCertificateInfo>();
+        return options.AddEncryptionCertificate(encryptionCertificate);
+    }
+
+    /// <summary>
+    /// Configures openiddict with encryption certificate
+    /// </summary>
+    public static OpenIddictServerBuilder AddEncryptionCertificate(
+        this OpenIddictServerBuilder options,
+        OpenIdCertificateInfo encryptionCertificate
+    )
+    {
         if (
             !string.IsNullOrEmpty(encryptionCertificate?.Password)
             && !string.IsNullOrEmpty(encryptionCertificate?.Base64Certificate)
@@ -76,92 +92,11 @@ public static class OpenIddictExtensions
     }
 
     /// <summary>
-    /// Imports Application from appsettings.json into OpenId database
-    /// </summary>
-    public static IApplicationBuilder UseOpenIdDictApplicationsFromConfiguration(
-        this IApplicationBuilder applicationBuilder,
-        Action<ApplicationsFromConfigurationOptions> configureOptions = null
-    )
-    {
-        Task.Run(
-                () =>
-                    UseOpenIdDictApplicationsFromConfigurationAsync(
-                        applicationBuilder,
-                        configureOptions
-                    )
-            )
-            .GetAwaiter()
-            .GetResult();
-
-        return applicationBuilder;
-    }
-
-    /// <summary>
-    /// Imports Application from appsettings.json into OpenId database
-    /// </summary>
-    public static async Task UseOpenIdDictApplicationsFromConfigurationAsync(
-        this IApplicationBuilder applicationBuilder,
-        Action<ApplicationsFromConfigurationOptions> configureOptions = null
-    )
-    {
-        var options = new ApplicationsFromConfigurationOptions();
-        configureOptions?.Invoke(options);
-
-        using IServiceScope scope = applicationBuilder.ApplicationServices.CreateScope();
-        IServiceProvider serviceProvider = scope.ServiceProvider;
-        IOpenIddictApplicationManager manager =
-            serviceProvider.GetRequiredService<IOpenIddictApplicationManager>();
-        var configurationProvider =
-            serviceProvider.GetRequiredService<IOpenIddictClientConfigurationProvider>();
-
-        var clients = configurationProvider.GetAllConfigurations();
-        foreach (OpenIddictClientConfiguration client in clients)
-        {
-            if (!string.IsNullOrEmpty(options.PublicUrl))
-            {
-                var baseUri = new Uri(options.PublicUrl);
-                PrependBaseUriToRelativeUris(client.RedirectUris, baseUri);
-                PrependBaseUriToRelativeUris(client.PostLogoutRedirectUris, baseUri);
-            }
-
-            object clientObject = await manager
-                .FindByClientIdAsync(client.ClientId!)
-                .ConfigureAwait(false);
-            // See OpenIddictConstants.Permissions for available permissions
-
-            if (clientObject is null)
-            {
-                await manager.CreateAsync(client).ConfigureAwait(false);
-            }
-            else
-            {
-                client.Type ??= "public";
-                await manager.PopulateAsync(clientObject, client).ConfigureAwait(false);
-                await manager.UpdateAsync(clientObject).ConfigureAwait(false);
-            }
-        }
-    }
-
-    private static void PrependBaseUriToRelativeUris(HashSet<Uri> uris, Uri baseUri)
-    {
-        if (uris == null)
-            return;
-
-        List<Uri> relativeUris = uris.Where(x => !x.IsAbsoluteUri).ToList();
-        foreach (var relativeUri in relativeUris)
-        {
-            uris.Remove(relativeUri);
-            uris.Add(new Uri(baseUri, relativeUri));
-        }
-    }
-
-    /// <summary>
     /// Registers implementation of IOption&lt;OpenIddictConfiguration&gt; and IOpenIddictClientConfigurationProvider
     /// </summary>
-    public static OpenIddictBuilder AddOpenIddictConfigurations(
+    public static OpenIddictBuilder AddOpenIddictConfiguration(
         this OpenIddictBuilder openIddictBuilder,
-        IConfiguration configuration,
-        string configurationSection = "OpenId"
+        IConfiguration configuration
     )
     {
         IServiceCollection services = openIddictBuilder.Services;
@@ -169,9 +104,7 @@ public static class OpenIddictExtensions
             IOpenIddictClientConfigurationProvider,
             OpenIddictClientConfigurationProvider
         >();
-        services.Configure<OpenIddictConfiguration>(
-            configuration.GetSection($"{configurationSection}")
-        );
+        services.Configure<OpenIddictConfiguration>(configuration);
 
         return openIddictBuilder;
     }
@@ -188,6 +121,51 @@ public static class OpenIddictExtensions
         {
             var settings = new OpenIddictSettings(options);
             configuration?.Invoke(settings);
+
+            if (settings.Configuration != null)
+            {
+                openIddictBuilder.AddOpenIddictConfiguration(settings.Configuration);
+                var typedConfiguration = settings.Configuration.Get<OpenIddictConfiguration>();
+                if (typedConfiguration?.EncryptionCertificate != null)
+                {
+                    options.AddEncryptionCertificate(typedConfiguration?.EncryptionCertificate);
+                }
+                if (typedConfiguration?.SigningCertificate != null)
+                {
+                    options.AddSigningCertificate(typedConfiguration?.SigningCertificate);
+                }
+
+                if (typedConfiguration?.Clients != null && typedConfiguration.Clients.Any())
+                {
+                    options.Services.AddTransient<ClientSeeder>();
+                    options.Services.AddSingleton<IPublicUrlProvider>(
+                        new PublicUrlProvider(
+                            !string.IsNullOrEmpty(settings.PublicUrl)
+                                ? settings.PublicUrl
+                                : typedConfiguration.PublicUrl
+                        )
+                    );
+                    options.Services.AddHostedService<SeedOpenIdClientConfigurationsWorker>();
+
+                    if (!settings.IsScopeRegistrationDisabled)
+                    {
+                        string[] scopes = typedConfiguration.Clients
+                            .SelectMany(x => x.Value?.Permissions ?? new HashSet<string>())
+                            .Where(
+                                x => x.StartsWith(OpenIddictConstants.Permissions.Prefixes.Scope)
+                            )
+                            .Select(
+                                x =>
+                                    x.Substring(
+                                        OpenIddictConstants.Permissions.Prefixes.Scope.Length
+                                    )
+                            )
+                            .ToArray();
+
+                        options.RegisterScopes(scopes);
+                    }
+                }
+            }
 
             options.SetTokenEndpointUris("/connect/token");
             options.UseAspNetCore().EnableTokenEndpointPassthrough();

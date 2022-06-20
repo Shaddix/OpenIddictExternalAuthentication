@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 
@@ -11,6 +12,11 @@ public class OpenIddictSettings
     {
         OpenIddictServerBuilder = openIddictServerBuilder;
     }
+
+    /// <summary>
+    /// PublicUrl will be prepended to relative URIs in 'RedirectUris' and 'PostLogoutRedirectUris'
+    /// </summary>
+    public string PublicUrl { get; set; }
 
     /// <summary>
     /// Disables logout endpoint (/connect/logout is enabled by default)
@@ -38,6 +44,8 @@ public class OpenIddictSettings
     public bool IsDeviceCodeFlowAllowed { get; set; }
 
     public OpenIddictServerBuilder OpenIddictServerBuilder { get; set; }
+
+    public IConfiguration Configuration { get; set; }
 
     /// <summary>
     /// Disables logout endpoint (/connect/logout is enabled by default)
@@ -81,6 +89,36 @@ public class OpenIddictSettings
     public OpenIddictSettings DisableRefreshTokenFlow()
     {
         IsRefreshTokenFlowDisabled = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the Configuration section to configure OpenId clients
+    /// </summary>
+    /// <param name="configuration"></param>
+    public OpenIddictSettings SetConfiguration(IConfiguration configuration)
+    {
+        Configuration = configuration;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the PublicUrl that will be prepended to relative URIs in 'RedirectUris' and 'PostLogoutRedirectUris'
+    /// </summary>
+    public OpenIddictSettings SetPublicUrl(string publicUrl)
+    {
+        PublicUrl = publicUrl;
+        return this;
+    }
+
+    public bool IsScopeRegistrationDisabled { get; set; }
+
+    /// <summary>
+    /// Disables the call to options.RegisterScopes with available client scopes (enabled by default)
+    /// </summary>
+    public OpenIddictSettings DisableScopeRegistration()
+    {
+        IsScopeRegistrationDisabled = true;
         return this;
     }
 }

@@ -66,10 +66,16 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
                 options.ClaimsIdentity.RoleClaimType = OpenIddictConstants.Claims.Role;
                 options.ClaimsIdentity.EmailClaimType = OpenIddictConstants.Claims.Email;
             });
+
+            var publicUrl = Configuration.GetSection("Auth").GetValue<string>("PublicHost");
             services
                 .AddOpenIddict()
-                .AddOpenIddictConfigurations(Configuration)
-                .AddDefaultAuthorizationController()
+                .AddDefaultAuthorizationController(
+                    options =>
+                        options
+                            .SetConfiguration(Configuration.GetSection("OpenId"))
+                            .SetPublicUrl(publicUrl)
+                )
                 .AddCore(options =>
                 {
                     options.UseEntityFrameworkCore().UseDbContext<IdentityContext>();
@@ -82,9 +88,6 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
                     {
                         options.UseAspNetCore().DisableTransportSecurityRequirement();
                     }
-
-                    options.AddSigningCertificateFromConfiguration(Configuration);
-                    options.AddEncryptionCertificateFromConfiguration(Configuration);
                 })
                 // Register the OpenIddict validation components.
                 .AddValidation(options =>
@@ -189,11 +192,6 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
                     spa.UseProxyToSpaDevelopmentServer("http://localhost:3140/");
                 }
             });
-
-            var publicUrl = Configuration.GetSection("Auth").GetValue<string>("PublicHost");
-            app.UseOpenIdDictApplicationsFromConfiguration(
-                options => options.SetPublicUrl(publicUrl)
-            );
 
             CreateUser(app).GetAwaiter().GetResult();
         }
