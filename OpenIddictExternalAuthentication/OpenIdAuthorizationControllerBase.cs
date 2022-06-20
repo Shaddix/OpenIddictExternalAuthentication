@@ -248,9 +248,7 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
                 return StandardError();
             }
 
-            IIdentity? identity = authenticateResult.Principal.Identity;
-            string? userName = identity!.Name;
-            TUser user = await _userManager.FindByNameAsync(userName);
+            TUser? user = await _userManager.GetUserAsync(authenticateResult.Principal);
 
             return await SignInUser(user, request);
         }
