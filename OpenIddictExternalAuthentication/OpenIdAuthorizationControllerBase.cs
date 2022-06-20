@@ -29,6 +29,7 @@ namespace Shaddix.OpenIddict.ExternalAuthentication;
 /// <summary>
 /// Default implementation of AuthorizationController that allows logging in via external login providers
 /// </summary>
+[ApiExplorerSettings(IgnoreApi = true)]
 public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controller
     where TUser : IdentityUser<TKey>, new()
     where TKey : IEquatable<TKey>
