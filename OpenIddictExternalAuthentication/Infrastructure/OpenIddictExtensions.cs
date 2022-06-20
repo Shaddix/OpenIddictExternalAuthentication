@@ -123,6 +123,7 @@ public static class OpenIddictExtensions
                 PrependBaseUriToRelativeUris(client.RedirectUris, baseUri);
                 PrependBaseUriToRelativeUris(client.PostLogoutRedirectUris, baseUri);
             }
+
             object clientObject = await manager
                 .FindByClientIdAsync(client.ClientId!)
                 .ConfigureAwait(false);
@@ -210,6 +211,12 @@ public static class OpenIddictExtensions
             if (settings.IsPasswordFlowAllowed)
             {
                 options.AllowPasswordFlow();
+            }
+
+            if (settings.IsDeviceCodeFlowAllowed)
+            {
+                options.AllowDeviceCodeFlow().SetVerificationEndpointUris("/connect/verify");
+                options.UseAspNetCore().EnableVerificationEndpointPassthrough();
             }
 
             if (!settings.IsRefreshTokenFlowDisabled)

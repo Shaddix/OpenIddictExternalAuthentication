@@ -1,4 +1,4 @@
-﻿ using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 
@@ -28,9 +28,14 @@ public class OpenIddictSettings
     public bool IsRefreshTokenFlowDisabled { get; set; }
 
     /// <summary>
-    /// Enables resource owner password flow (via /connect/token, disabled by default as not secure) 
+    /// Enables resource owner password flow (via /connect/token, disabled by default as not secure)
     /// </summary>
     public bool IsPasswordFlowAllowed { get; set; }
+
+    /// <summary>
+    /// Enables device code flow (via /connect/verify, disabled by default since it's not common)
+    /// </summary>
+    public bool IsDeviceCodeFlowAllowed { get; set; }
 
     public OpenIddictServerBuilder OpenIddictServerBuilder { get; set; }
 
@@ -58,6 +63,15 @@ public class OpenIddictSettings
     public OpenIddictSettings AllowPasswordFlow()
     {
         IsPasswordFlowAllowed = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Enables device code flow (via /connect/verify, disabled by default since it's not common)
+    /// </summary>
+    public OpenIddictSettings AllowDeviceCodeFlow()
+    {
+        IsDeviceCodeFlowAllowed = true;
         return this;
     }
 
