@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenIddict.Abstractions;
@@ -92,7 +94,7 @@ public static class OpenIddictExtensions
     /// <summary>
     /// Registers implementation of IOption&lt;OpenIddictConfiguration&gt; and IOpenIddictClientConfigurationProvider
     /// </summary>
-    public static OpenIddictBuilder AddOpenIddictConfiguration(
+    internal static OpenIddictBuilder AddOpenIddictConfiguration(
         this OpenIddictBuilder openIddictBuilder,
         IConfiguration configuration
     )
@@ -143,7 +145,10 @@ public static class OpenIddictExtensions
                                 : typedConfiguration.PublicUrl
                         )
                     );
-                    options.Services.AddHostedService<SeedOpenIdClientConfigurationsWorker>();
+                    if (settings.IsSeedingInWorker)
+                    {
+                        options.Services.AddHostedService<SeedOpenIdClientConfigurationsWorker>();
+                    }
 
                     if (!settings.IsScopeRegistrationDisabled)
                     {
@@ -203,5 +208,35 @@ public static class OpenIddictExtensions
                 options.AllowRefreshTokenFlow();
             }
         });
+    }
+
+    /// <summary>
+    /// Initializes OpenidDict clients according to configuration (usually from appsettings.json)
+    /// </summary>
+    public static void SeedOpenIdClients(this IApplicationBuilder app)
+    {
+        Task.Run(app.SeedOpenIdClientsAsync).GetAwaiter().GetResult();
+    }
+
+    /// <summary>
+    /// Initializes OpenidDict clients according to configuration (usually from appsettings.json)
+    /// </summary>
+    public static async Task SeedOpenIdClientsAsync(this IApplicationBuilder app)
+    {
+        await app.ApplicationServices.SeedOpenIdClientsAsync();
+    }
+
+    /// <summary>
+    /// Initializes OpenidDict clients according to configuration (usually from appsettings.json)
+    /// </summary>
+    internal static async Task SeedOpenIdClientsAsync(this IServiceProvider applicationServices)
+    {
+        await using var scope = applicationServices.CreateAsyncScope();
+        var serviceProvider = scope.ServiceProvider;
+
+        var publicUrlProvider = serviceProvider.GetRequiredService<IPublicUrlProvider>();
+        var clientSeeder = serviceProvider.GetRequiredService<ClientSeeder>();
+
+        await clientSeeder.Seed(publicUrlProvider.PublicUrl);
     }
 }

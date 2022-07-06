@@ -193,6 +193,7 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
                 }
             });
 
+            app.SeedOpenIdClients();
             CreateUser(app).GetAwaiter().GetResult();
         }
 

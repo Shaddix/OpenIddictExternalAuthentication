@@ -111,6 +111,9 @@ public class OpenIddictSettings
         return this;
     }
 
+    /// <summary>
+    /// Determines whether to call options.RegisterScopes with available client scopes (enabled by default) or not
+    /// </summary>
     public bool IsScopeRegistrationDisabled { get; set; }
 
     /// <summary>
@@ -119,6 +122,17 @@ public class OpenIddictSettings
     public OpenIddictSettings DisableScopeRegistration()
     {
         IsScopeRegistrationDisabled = true;
+        return this;
+    }
+
+    public bool IsSeedingInWorker { get; set; }
+
+    /// <summary>
+    /// Enables seeding of of clients in a Worker (disabled by default)
+    /// </summary>
+    public OpenIddictSettings EnableSeedingInWorker()
+    {
+        IsSeedingInWorker = true;
         return this;
     }
 }

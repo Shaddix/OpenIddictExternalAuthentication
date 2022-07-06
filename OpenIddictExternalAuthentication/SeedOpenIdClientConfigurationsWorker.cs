@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 
@@ -19,13 +18,7 @@ public class SeedOpenIdClientConfigurationsWorker : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await using var scope = _serviceProvider.CreateAsyncScope();
-        var serviceProvider = scope.ServiceProvider;
-
-        var publicUrlProvider = serviceProvider.GetRequiredService<IPublicUrlProvider>();
-        var clientSeeder = serviceProvider.GetRequiredService<ClientSeeder>();
-
-        await clientSeeder.Seed(publicUrlProvider.PublicUrl);
+        await _serviceProvider.SeedOpenIdClientsAsync();
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

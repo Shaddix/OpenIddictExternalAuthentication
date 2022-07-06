@@ -107,6 +107,37 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     }
 
     /// <summary>
+    /// Redirects to external login provider
+    /// </summary>
+    [AllowAnonymous]
+    [HttpGet("~/connect/authorize/redirect")]
+    [HttpPost("~/connect/authorize/redirect")]
+    [IgnoreAntiforgeryToken]
+    public virtual IActionResult ExternalRedirect(string provider, string returnUrl)
+    {
+        if (!returnUrl.StartsWith("?"))
+        {
+            // we append a dummy host to be able to extract the Query part
+            var uri = new Uri("http://localhost" + returnUrl);
+            returnUrl = uri.Query;
+        }
+        
+        // If an identity provider was explicitly specified, redirect
+        // the user agent to the AccountController.ExternalLogin action.
+        var redirectUrl = Url.Action(
+            nameof(ExternalCallback),
+            ControllerName,
+            new { originalQuery = returnUrl }
+        );
+
+        var properties = _signInManager.ConfigureExternalAuthenticationProperties(
+            provider,
+            redirectUrl
+        );
+        return Challenge(properties, provider);
+    }
+    
+    /// <summary>
     /// Implements authorize endpoint for Auth Code Flow
     /// </summary>
     /// <param name="provider">name of external authentication provider (e.g. 'Google', 'Facebook', etc). Casing matters!</param>
@@ -136,20 +167,7 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
             || (request.HasPrompt(Prompts.Login) && externalLoginInfo.LoginProvider != provider)
         )
         {
-            // If an identity provider was explicitly specified, redirect
-            // the user agent to the AccountController.ExternalLogin action.
-            var redirectUrl = Url.Action(
-                nameof(ExternalCallback),
-                ControllerName,
-                new { originalQuery = HttpContext.Request.QueryString }
-            );
-
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(
-                provider,
-                redirectUrl
-            );
-            // Request a redirect to the external login provider.
-            return Challenge(properties, provider);
+            return ExternalRedirect(provider, HttpContext.Request.QueryString.ToString());
         }
 
         try
