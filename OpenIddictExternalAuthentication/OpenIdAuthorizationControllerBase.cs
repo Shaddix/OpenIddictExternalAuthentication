@@ -7,10 +7,10 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Security.Authentication;
 using System.Security.Claims;
-using System.Security.Principal;
 using System.Threading.Tasks;
 using IdentityModel;
 using Microsoft.AspNetCore;
@@ -117,11 +117,14 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     {
         if (!returnUrl.StartsWith("?"))
         {
+            NameValueCollection queryString = System.Web.HttpUtility.ParseQueryString(returnUrl);
+            queryString.Set("provider", provider);
+            
             // we append a dummy host to be able to extract the Query part
-            var uri = new Uri("http://localhost" + returnUrl);
+            var uri = new Uri("http://localhost" + queryString.ToString());
             returnUrl = uri.Query;
         }
-        
+
         // If an identity provider was explicitly specified, redirect
         // the user agent to the AccountController.ExternalLogin action.
         var redirectUrl = Url.Action(
@@ -136,7 +139,7 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
         );
         return Challenge(properties, provider);
     }
-    
+
     /// <summary>
     /// Implements authorize endpoint for Auth Code Flow
     /// </summary>
