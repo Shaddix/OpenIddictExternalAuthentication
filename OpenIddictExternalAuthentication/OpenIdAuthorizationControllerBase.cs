@@ -113,7 +113,7 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     [HttpGet("~/connect/authorize/redirect")]
     [HttpPost("~/connect/authorize/redirect")]
     [IgnoreAntiforgeryToken]
-    public virtual IActionResult ExternalRedirect(string provider, string returnUrl)
+    public virtual IActionResult ExternalRedirect([FromForm]string provider, string returnUrl)
     {
         if (!returnUrl.StartsWith("?"))
         {
