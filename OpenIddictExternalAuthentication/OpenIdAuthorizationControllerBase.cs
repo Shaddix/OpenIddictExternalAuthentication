@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Authentication;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -19,10 +20,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 using static OpenIddict.Abstractions.OpenIddictConstants;
+
+[assembly: InternalsVisibleTo("OpenIddictExternalAuthentication.Tests")]
 
 namespace Shaddix.OpenIddict.ExternalAuthentication;
 
@@ -45,6 +49,7 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     protected readonly UserManager<TUser> _userManager;
 
     private readonly IOpenIddictClientConfigurationProvider _clientConfigurationProvider;
+    private readonly ILogger<OpenIdAuthorizationControllerBase<TUser, TKey>> _logger;
 
     /// <summary>
     /// Name of the controller to be used in URL generation.
@@ -57,12 +62,14 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     protected OpenIdAuthorizationControllerBase(
         SignInManager<TUser> signInManager,
         UserManager<TUser> userManager,
-        IOpenIddictClientConfigurationProvider clientConfigurationProvider
+        IOpenIddictClientConfigurationProvider clientConfigurationProvider,
+        ILogger<OpenIdAuthorizationControllerBase<TUser, TKey>> logger
     )
     {
         _signInManager = signInManager;
         _userManager = userManager;
         _clientConfigurationProvider = clientConfigurationProvider;
+        _logger = logger;
     }
 
     /// <summary>
@@ -95,15 +102,82 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     [HttpGet("~/connect/authorize/callback")]
     [HttpPost("~/connect/authorize/callback")]
     [IgnoreAntiforgeryToken]
-    public virtual IActionResult ExternalCallback(string? remoteError, string originalQuery)
+    public virtual async Task<IActionResult> ExternalCallback(
+        string? remoteError,
+        string originalQuery
+    )
     {
+        _logger.LogInformation("User was redirected from external provider");
         if (remoteError != null)
         {
             return BadRequest("Error from external provider. " + remoteError);
         }
 
-        string redirectUrl = Url.Action(nameof(Authorize), ControllerName) + originalQuery;
-        return LocalRedirect(redirectUrl!);
+        if (!IsSpaRequest(originalQuery))
+        {
+            _logger.LogInformation("This is not a SPA call, will authorize and redirect");
+
+            return await AuthorizeNonSpa(originalQuery);
+        }
+        else
+        {
+            _logger.LogInformation("Will redirect to {OriginalQuery}", originalQuery);
+
+            string redirectUrl = Url.Action(nameof(Authorize), ControllerName) + originalQuery;
+
+            return LocalRedirect(redirectUrl!);
+        }
+    }
+
+    private static bool IsSpaRequest(string originalQuery)
+    {
+        Uri intermediateUri = CreateAbsoluteUriFromString(originalQuery);
+        NameValueCollection queryString = System.Web.HttpUtility.ParseQueryString(
+            intermediateUri.Query
+        );
+        return !string.IsNullOrEmpty(queryString.Get("client_id"));
+    }
+
+    private async Task<IActionResult> AuthorizeNonSpa(string returnUrl)
+    {
+        IActionResult Error(string message)
+        {
+            return RedirectToPage("./Login", new { ReturnUrl = returnUrl, ErrorMessage = message });
+        }
+
+        var externalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
+        if (externalLoginInfo == null)
+        {
+            return Error("Error loading external login information.");
+        }
+
+        try
+        {
+            TUser? user = await _userManager.FindByLoginAsync(
+                externalLoginInfo.LoginProvider,
+                externalLoginInfo.ProviderKey
+            );
+
+            if (user == null)
+            {
+                try
+                {
+                    user = await CreateUserFromExternalInfo(externalLoginInfo);
+                }
+                catch (Exception e)
+                {
+                    return Error(e.Message);
+                }
+            }
+
+            await _signInManager.SignInAsync(user, false, externalLoginInfo.LoginProvider);
+        }
+        catch (Exception e)
+        {
+            return Error(e.Message);
+        }
+
+        return LocalRedirect(returnUrl);
     }
 
     /// <summary>
@@ -113,17 +187,17 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     [HttpGet("~/connect/authorize/redirect")]
     [HttpPost("~/connect/authorize/redirect")]
     [IgnoreAntiforgeryToken]
-    public virtual IActionResult ExternalRedirect([FromForm]string provider, string returnUrl)
+    public virtual IActionResult ExternalRedirect([FromForm] string provider, string returnUrl)
     {
-        if (!returnUrl.StartsWith("?"))
-        {
-            NameValueCollection queryString = System.Web.HttpUtility.ParseQueryString(returnUrl);
-            queryString.Set("provider", provider);
-            
-            // we append a dummy host to be able to extract the Query part
-            var uri = new Uri("http://localhost" + queryString.ToString());
-            returnUrl = uri.Query;
-        }
+        _logger.LogInformation(
+            "Will redirect to external login provider {Provider}, return url: {ReturnUrl}",
+            provider,
+            returnUrl
+        );
+
+        returnUrl = AdjustReturnUrl(returnUrl, provider);
+
+        _logger.LogInformation("Full return url: {ReturnUrl}", returnUrl);
 
         // If an identity provider was explicitly specified, redirect
         // the user agent to the AccountController.ExternalLogin action.
@@ -140,6 +214,48 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
         return Challenge(properties, provider);
     }
 
+    internal static string AdjustReturnUrl(string returnUrl, string provider)
+    {
+        // returnUrl could look like:
+        // - '/' (when opening login form directly
+        // - '?client_id=web_client&redirect_uri=https%3A%2F%2Flocalhost%3A5001%2Findex.html%3Fauth-callback%3D1&response_type=code&scope=offline_access&state=...&code_challenge=...&code_challenge_method=S256&response_mode=query&prompt=login&display=popup&provider=Google'
+        //      when opening via button from SPA
+        // - '?client_id=web_client&redirect_uri=https%3A%2F%2Flocalhost%3A5001%2Findex.html%3Fauth-callback%3D1&response_type=code&scope=offline_access&state=...&code_challenge=...&code_challenge_method=S256&response_mode=query&prompt=login&display=popup'
+        //      (without &provider=Google at the end) when opening from SPA via 'Internal' button, i.e. without specifying the provider
+        // - null (define when!)
+
+        returnUrl ??= "";
+        if (!IsSpaRequest(returnUrl))
+        {
+            return returnUrl;
+        }
+
+        Uri intermediateUri = CreateAbsoluteUriFromString(returnUrl);
+
+        NameValueCollection queryString = System.Web.HttpUtility.ParseQueryString(
+            intermediateUri.Query
+        );
+        queryString.Set("provider", provider);
+
+        UriBuilder builder = new UriBuilder(intermediateUri) { Query = queryString.ToString() };
+
+        returnUrl = builder.Uri.Query;
+        return returnUrl;
+    }
+
+    private static Uri CreateAbsoluteUriFromString(string returnUrl)
+    {
+        var uri = new Uri(returnUrl, UriKind.RelativeOrAbsolute);
+        if (!uri.IsAbsoluteUri)
+        {
+            // We append a dummy host to construct a valid URI.
+            // We will actually use only PathAndQuery
+            uri = new Uri("http://localhost" + (returnUrl.StartsWith('/') ? "" : "/") + returnUrl);
+        }
+
+        return uri;
+    }
+
     /// <summary>
     /// Implements authorize endpoint for Auth Code Flow
     /// </summary>
@@ -150,6 +266,8 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     [IgnoreAntiforgeryToken]
     public virtual async Task<IActionResult> Authorize(string? provider)
     {
+        _logger.LogInformation("Authorizing with provider {Provider}", provider);
+
         OpenIddictRequest? request = HttpContext.GetOpenIddictServerRequest();
         if (request == null)
         {
@@ -344,10 +462,23 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
         ExternalLoginInfo externalLoginInfo
     )
     {
+        _logger.LogInformation(
+            "Creating new user, provider: {Provider}, displayName: {DisplayName}, provider key: {ProviderKey}",
+            externalLoginInfo.LoginProvider,
+            externalLoginInfo.ProviderDisplayName,
+            externalLoginInfo.ProviderKey
+        );
+
         TUser? user = await CreateNewUser(externalLoginInfo);
 
         if (user == null)
         {
+            _logger.LogWarning(
+                "Failed to create the user, provider: {Provider}, displayName: {DisplayName}, provider key: {ProviderKey}",
+                externalLoginInfo.LoginProvider,
+                externalLoginInfo.ProviderDisplayName,
+                externalLoginInfo.ProviderKey
+            );
             throw new AuthenticationException("login_not_allowed");
         }
 
@@ -422,6 +553,11 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
         var scopes = request.GetScopes();
         principal.SetScopes(scopes);
 
+        _logger.LogInformation(
+            "New token created for user {UserId}, scopes: {scopes}",
+            user.Id,
+            string.Join(", ", scopes)
+        );
         foreach (var claim in principal.Claims)
         {
             claim.SetDestinations(GetDestinations(claim, principal));

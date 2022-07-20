@@ -2,18 +2,21 @@
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using OpenIddict.Abstractions;
+using Shaddix.OpenIddict.ExternalAuthentication.Example.Permissions;
 using Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 
-namespace Shaddix.OpenIddict.ExternalAuthentication.Example.Permissions;
+namespace Shaddix.OpenIddict.ExternalAuthentication.Example.Controllers;
 
 public class AuthorizationController : OpenIdAuthorizationControllerBase<IdentityUser, string>
 {
     public AuthorizationController(
         SignInManager<IdentityUser> signInManager,
         UserManager<IdentityUser> userManager,
-        IOpenIddictClientConfigurationProvider clientConfigurationProvider
-    ) : base(signInManager, userManager, clientConfigurationProvider) { }
+        IOpenIddictClientConfigurationProvider clientConfigurationProvider,
+        ILogger<AuthorizationController> logger
+    ) : base(signInManager, userManager, clientConfigurationProvider, logger) { }
 
     protected override async Task<IList<Claim>> GetClaims(
         IdentityUser user,
