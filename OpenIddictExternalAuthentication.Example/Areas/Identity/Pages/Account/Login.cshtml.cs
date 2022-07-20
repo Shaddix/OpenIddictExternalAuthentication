@@ -110,6 +110,7 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example.Areas.Identity.Pages
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
+            ReturnUrl = returnUrl;
 
             ExternalLogins = (
                 await _signInManager.GetExternalAuthenticationSchemesAsync()
