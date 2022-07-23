@@ -563,6 +563,11 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
             claim.SetDestinations(GetDestinations(claim, principal));
         }
 
+        if (!await _signInManager.CanSignInAsync(user))
+        {
+            return Error("signin_requirements_not_met");
+        }
+
         return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }
 
