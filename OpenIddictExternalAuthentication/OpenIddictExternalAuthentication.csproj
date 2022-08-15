@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>2.2.2</PackageVersion>
+        <PackageVersion>2.3.1</PackageVersion>
         <Title>Shaddix.OpenIddict.ExternalAuthentication</Title>
         <Authors>Artur Drobinskiy</Authors>
         <Description>OpenIddict extension to support Auth code flow fo built-in ASP.Net identity providers</Description>

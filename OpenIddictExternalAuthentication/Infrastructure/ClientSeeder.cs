@@ -47,9 +47,22 @@ public class ClientSeeder
             }
             else
             {
-                client.Type ??= "public";
+                if (string.IsNullOrEmpty(client.Type))
+                {
+                    if (string.IsNullOrEmpty(client.ClientSecret))
+                    {
+                        client.Type = "public";
+                    }
+                    else
+                    {
+                        client.Type = "confidential";
+                    }
+                }
+
                 await _applicationManager.PopulateAsync(clientObject, client).ConfigureAwait(false);
-                await _applicationManager.UpdateAsync(clientObject).ConfigureAwait(false);
+                await _applicationManager
+                    .UpdateAsync(clientObject, client.ClientSecret ?? "")
+                    .ConfigureAwait(false);
             }
         }
     }
