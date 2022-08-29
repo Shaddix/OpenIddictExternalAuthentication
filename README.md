@@ -73,3 +73,9 @@ You could also take a look at [OpenIddictExternalAuthentication.Example](OpenIdd
 
 ## External user storage
 We use standard Asp.Net Identity mechanism to store external logins (namely, `AspNetUserLogins` table). To find a user by external OAuth id you need to use `_userManager.FindByLoginAsync(providerName, externalUserId)`
+
+# FAQ
+1. Error in browser: "The specified 'redirect_uri' is not valid for this client application."
+   - Check `OpenIddictApplications` table and verify that `RedirectUris` field contains the URI you are redirecting to.
+   - If URI is not there, check `RedirectUris` in `appsettings.json` for the respective application.
+   - If problematic URI is a relative one, make sure that you called `options.SetPublicUrl()` with correct URL in `AddDefaultAuthorizationController` configuration callback.

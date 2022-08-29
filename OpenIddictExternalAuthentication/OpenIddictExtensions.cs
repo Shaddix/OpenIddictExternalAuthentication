@@ -171,6 +171,10 @@ public static class OpenIddictExtensions
                 }
             }
 
+            if (string.IsNullOrEmpty(settings.PublicUrl))
+            {
+                options.SetIssuer(new Uri(settings.PublicUrl));
+            }
             options.SetTokenEndpointUris("/connect/token");
             options.UseAspNetCore().EnableTokenEndpointPassthrough();
 
