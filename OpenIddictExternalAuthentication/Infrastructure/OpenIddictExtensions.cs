@@ -229,7 +229,7 @@ public static class OpenIddictExtensions
     /// <summary>
     /// Initializes OpenidDict clients according to configuration (usually from appsettings.json)
     /// </summary>
-    internal static async Task SeedOpenIdClientsAsync(this IServiceProvider applicationServices)
+    public static async Task SeedOpenIdClientsAsync(this IServiceProvider applicationServices)
     {
         await using var scope = applicationServices.CreateAsyncScope();
         var serviceProvider = scope.ServiceProvider;
