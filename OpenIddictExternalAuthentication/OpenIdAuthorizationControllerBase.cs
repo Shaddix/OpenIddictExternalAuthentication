@@ -309,6 +309,10 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
                     return Error(e.Message);
                 }
             }
+            else
+            {
+                await UpdateUser(user, externalLoginInfo);
+            }
 
             return await SignInUser(user, request);
         }
@@ -317,6 +321,12 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
             return BadRequest();
         }
     }
+
+    /// <summary>
+    /// Here you could update your user based on updated information from 3rd party provider
+    /// (e.g. you could update user LastName based on the one defined on Facebook)
+    /// </summary>
+    protected async Task UpdateUser(TUser user, ExternalLoginInfo externalLoginInfo) { }
 
     /// <summary>
     /// Tries to authorize the user user built-in method without using any specific provider.
