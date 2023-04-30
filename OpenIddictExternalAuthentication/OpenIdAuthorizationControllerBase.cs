@@ -25,6 +25,7 @@ using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 using static OpenIddict.Abstractions.OpenIddictConstants;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 [assembly: InternalsVisibleTo("OpenIddictExternalAuthentication.Tests")]
 
@@ -326,7 +327,7 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     /// Here you could update your user based on updated information from 3rd party provider
     /// (e.g. you could update user LastName based on the one defined on Facebook)
     /// </summary>
-    protected async Task UpdateUser(TUser user, ExternalLoginInfo externalLoginInfo) { }
+    protected virtual async Task UpdateUser(TUser user, ExternalLoginInfo externalLoginInfo) { }
 
     /// <summary>
     /// Tries to authorize the user user built-in method without using any specific provider.
@@ -418,7 +419,7 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
             );
             if (!result.Succeeded)
             {
-                return StandardError();
+                return StandardError(result);
             }
 
             return await SignInUser(user, request);
@@ -584,8 +585,16 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     /// <summary>
     /// Default error that is returned in case of authentication error
     /// </summary>
-    protected virtual IActionResult StandardError()
+    /// <param name="signInResult"></param>
+    protected virtual IActionResult StandardError(SignInResult? signInResult = null)
     {
+        if (signInResult is { IsLockedOut: true })
+            return Error("locked");
+        if (signInResult is { RequiresTwoFactor: true })
+            return Error("requires_two_factor");
+        if (signInResult is { IsNotAllowed: true })
+            return Error("not_allowed");
+
         return Error("invalid_username_or_password");
     }
 
