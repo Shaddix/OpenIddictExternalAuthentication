@@ -1,7 +1,7 @@
 # OpenIddictExternalAuthentication
 [![NUGET](https://badge.fury.io/nu/Shaddix.OpenIddict.ExternalAuthentication.svg)](https://www.nuget.org/packages/Shaddix.OpenIddict.ExternalAuthentication/)
 [![MIT](https://img.shields.io/dub/l/vibe-d.svg)](https://opensource.org/licenses/MIT)
-[![NET6](https://img.shields.io/badge/-.NET%206.0-blueviolet)](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+[![NET6](https://img.shields.io/badge/-.NET%207.0-blueviolet)](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
 
 Library that simplifies integration of [OpenIdDict](https://github.com/openiddict/openiddict-core) to a several lines of code.
 It contain basic implementation of `AuthenticationController`, mostly taken from [OpenIddict Samples](https://github.com/openiddict/openiddict-samples).
@@ -12,6 +12,7 @@ It contain basic implementation of `AuthenticationController`, mostly taken from
 3. Refresh token flow
 4. Authorization Code flow
 5. Resource Owner Password Flow (disabled by default, could be enabled via configuration)
+6. `UseIdentityServerRefreshTokens()` option that eases the migration from IdentityServer (i.e., that RefreshTokens from IdentityServer will still work, if `PersistedGrants` table remains)
 
 Here's the [vanilla js](https://oauth.arturdr.ru) or [react](https://oauth.arturdr.ru/react) demo of Google/Facebook authentication using OpenIddict on backend.
 The page has several buttons to log in via different providers.
