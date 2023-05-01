@@ -352,3 +352,6 @@ MigrationBackup/
 **/.idea/**/shelf
 
 /IdentityOAuthSpaExtensions.Example/keys
+/OpenIddictExternalAuthentication.Example/temp.db
+/OpenIddictExternalAuthentication.Example/temp.db-shm
+/OpenIddictExternalAuthentication.Example/temp.db-wal

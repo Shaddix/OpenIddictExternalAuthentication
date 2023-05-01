@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
 using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;
 using Shaddix.OpenIddict.ExternalAuthentication.Example.Permissions;
@@ -36,11 +38,13 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
             services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
 
             services.AddControllers();
+            var sqliteFilename = "temp.db";
             services.AddDbContext<IdentityContext>(options =>
             {
-                options.UseInMemoryDatabase("OAuthTest");
+                options.UseSqlite($"Data Source={sqliteFilename}");
                 options.UseOpenIddict();
             });
+            File.Delete(sqliteFilename);
 
             services
                 .AddDefaultIdentity<IdentityUser>(options =>
@@ -75,6 +79,7 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
                         options
                             .SetConfiguration(Configuration.GetSection("OpenId"))
                             .SetPublicUrl(publicUrl)
+                            .UseIdentityServerRefreshTokens<IdentityContext, IdentityUser>()
                 )
                 .AddCore(options =>
                 {
@@ -138,6 +143,10 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            CreateDatabase(app).GetAwaiter().GetResult();
+            app.SeedOpenIdClients();
+            CreateUser(app).GetAwaiter().GetResult();
+
             var forwardedHeadersOptions = new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
@@ -192,19 +201,39 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
                     spa.UseProxyToSpaDevelopmentServer("http://localhost:3140/");
                 }
             });
+        }
 
-            app.SeedOpenIdClients();
-            CreateUser(app).GetAwaiter().GetResult();
+        private async Task CreateDatabase(IApplicationBuilder app)
+        {
+            using var scope = app.ApplicationServices.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<IdentityContext>();
+            await dbContext.Database.MigrateAsync();
         }
 
         private async Task CreateUser(IApplicationBuilder app)
         {
             using var scope = app.ApplicationServices.CreateScope();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<IdentityContext>();
 
             var user = new IdentityUser("tst@gmail.com");
             await userManager.CreateAsync(user);
             await userManager.AddPasswordAsync(user, "123qweASD!");
+
+            dbContext.PersistedGrants.Add(
+                new PersistedGrant()
+                {
+                    Key = "123",
+                    Type = "refresh_token",
+                    ClientId = "web_client",
+                    SubjectId = user.Id,
+                    CreationTime = DateTime.UtcNow,
+                    Expiration = DateTime.UtcNow.AddDays(1),
+                }
+            );
+            await dbContext.SaveChangesAsync();
+            var persistedGrants = await dbContext.PersistedGrants.ToListAsync();
+            Console.WriteLine(JsonConvert.SerializeObject(persistedGrants));
         }
     }
 }

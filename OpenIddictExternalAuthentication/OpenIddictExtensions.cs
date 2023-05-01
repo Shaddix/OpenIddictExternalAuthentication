@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenIddict.Abstractions;
+using OpenIddict.Server;
+using Shaddix.OpenIddict.ExternalAuthentication.IdentityServerMigrator;
 
 namespace Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 
@@ -134,7 +136,6 @@ public static class OpenIddictExtensions
                 {
                     options.AddSigningCertificate(typedConfiguration?.SigningCertificate);
                 }
-
                 if (typedConfiguration?.Clients != null && typedConfiguration.Clients.Any())
                 {
                     options.Services.AddTransient<ClientSeeder>();
@@ -207,6 +208,48 @@ public static class OpenIddictExtensions
             {
                 options.AllowRefreshTokenFlow();
             }
+
+            if (settings.IdentityServerRefreshTokensEnabled)
+            {
+                RegisterIdentityServerRefreshTokenHandlers(settings, options, openIddictBuilder);
+            }
+        });
+    }
+
+    /// <summary>
+    /// Register types that intercept RefreshToken calls and checks if this RefreshToken exists in IdentityServer's table
+    /// </summary>
+    private static void RegisterIdentityServerRefreshTokenHandlers(
+        OpenIddictSettings settings,
+        OpenIddictServerBuilder options,
+        OpenIddictBuilder openIddictBuilder
+    )
+    {
+        var identityServerRefreshTokenValidatorType =
+            typeof(IdentityServerRefreshTokenValidator<>).MakeGenericType(settings.DbContextType);
+        openIddictBuilder.Services.AddTransient(identityServerRefreshTokenValidatorType);
+        openIddictBuilder.Services.AddTransient<IExternalRefreshTokenValidator>(
+            provider =>
+                provider.GetRequiredService(identityServerRefreshTokenValidatorType)
+                as IExternalRefreshTokenValidator
+        );
+
+        var validatorHandlerType = typeof(ExternalRefreshTokenValidatorHandler<>).MakeGenericType(
+            settings.UserType
+        );
+        openIddictBuilder.Services.AddTransient(validatorHandlerType);
+
+        options.AddEventHandler<OpenIddictServerEvents.ValidateTokenContext>(builder =>
+        {
+            builder
+                .UseScopedHandler<
+                    IOpenIddictServerHandler<OpenIddictServerEvents.ValidateTokenContext>
+                >(s => s.GetRequiredService(validatorHandlerType))
+                .SetOrder(
+                    OpenIddictServerHandlers.Protection.ValidateIdentityModelToken.Descriptor.Order
+                        - 100
+                )
+                .Build();
         });
     }
 

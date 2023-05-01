@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
@@ -125,14 +127,54 @@ public class OpenIddictSettings
         return this;
     }
 
+    /// <summary>
+    /// Is seeding of clients in a Worker enabled (disabled by default)
+    /// </summary>
     public bool IsSeedingInWorker { get; set; }
 
     /// <summary>
-    /// Enables seeding of of clients in a Worker (disabled by default)
+    /// Enables seeding of clients in a Worker (disabled by default)
     /// </summary>
     public OpenIddictSettings EnableSeedingInWorker()
     {
         IsSeedingInWorker = true;
+        return this;
+    }
+
+    /// <summary>
+    /// If you were using IdentityServer before,
+    /// then RefreshTokens issued by Identity Server will not work on OpenIdDict.
+    /// If you want your users with IS refresh tokens to work, it make sense to enable this option.
+    /// The functionality relies on PersistedGrants table NOT being removed from DB.
+    /// IdentityServerRefreshTokensEnabled is disabled by default.
+    /// </summary>
+    public bool IdentityServerRefreshTokensEnabled { get; set; }
+    public Type UserType { get; set; }
+    public Type DbContextType { get; set; }
+
+    /// <summary>
+    /// If you were using IdentityServer before,
+    /// then RefreshTokens issued by Identity Server will not work on OpenIdDict.
+    /// If you want your users with IS refresh tokens to work, it make sense to enable this option.
+    /// The functionality relies on PersistedGrants table NOT being removed from DB.
+    /// IdentityServerRefreshTokensEnabled is disabled by default.
+    /// </summary>
+    public OpenIddictSettings UseIdentityServerRefreshTokens<TDbContext, TUser>()
+        where TDbContext : DbContext =>
+        UseIdentityServerRefreshTokens(typeof(TDbContext), typeof(TUser));
+
+    /// <summary>
+    /// If you were using IdentityServer before,
+    /// then RefreshTokens issued by Identity Server will not work on OpenIdDict.
+    /// If you want your users with IS refresh tokens to work, it make sense to enable this option.
+    /// The functionality relies on PersistedGrants table NOT being removed from DB.
+    /// IdentityServerRefreshTokensEnabled is disabled by default.
+    /// </summary>
+    public OpenIddictSettings UseIdentityServerRefreshTokens(Type dbContextType, Type userType)
+    {
+        DbContextType = dbContextType;
+        UserType = userType;
+        IdentityServerRefreshTokensEnabled = true;
         return this;
     }
 }
