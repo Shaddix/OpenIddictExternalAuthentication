@@ -19,7 +19,7 @@ public class IdentityServerRefreshTokenValidator<TDbContext> : IExternalRefreshT
         var nowDate = DateTime.UtcNow;
         return await _dbContext.Database
             .SqlQuery<string>(
-                $"SELECT \"SubjectId\" as Value FROM \"PersistedGrants\" WHERE \"Type\" = 'refresh_token' AND \"Key\" = {refreshToken} AND \"ClientId\" = {clientId} AND \"Expiration\" > {nowDate}"
+                $"SELECT \"SubjectId\" as \"Value\" FROM \"PersistedGrants\" WHERE \"Type\" = 'refresh_token' AND \"Key\" = {refreshToken} AND \"ClientId\" = {clientId} AND \"Expiration\" > {nowDate}"
             )
             .FirstOrDefaultAsync();
     }

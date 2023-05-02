@@ -42,9 +42,11 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
             services.AddDbContext<IdentityContext>(options =>
             {
                 options.UseSqlite($"Data Source={sqliteFilename}");
+                // options.UseNpgsql(
+                //     $"Server=localhost;Database=openid_test;Port=5432;Username=postgres;Password=postgres;Pooling=true;Keepalive=5;Command Timeout=60;"
+                // );
                 options.UseOpenIddict();
             });
-            File.Delete(sqliteFilename);
 
             services
                 .AddDefaultIdentity<IdentityUser>(options =>
@@ -210,6 +212,7 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
         {
             using var scope = app.ApplicationServices.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<IdentityContext>();
+            await dbContext.Database.EnsureDeletedAsync();
             await dbContext.Database.MigrateAsync();
         }
 
