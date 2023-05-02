@@ -79,7 +79,7 @@ public class OpenIdDictConversionMiddleware
         var clientId = query["client_id"].ToString();
         if (_clientConfigurationProvider.TryGetConfiguration(clientId, out var client))
         {
-            if (!string.IsNullOrEmpty(client.ClientSecret))
+            if (string.IsNullOrEmpty(client.ClientSecret))
             {
                 query.Remove("client_secret");
             }
