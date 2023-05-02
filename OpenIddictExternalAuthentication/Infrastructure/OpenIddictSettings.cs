@@ -159,9 +159,9 @@ public class OpenIddictSettings
     /// The functionality relies on PersistedGrants table NOT being removed from DB.
     /// IdentityServerRefreshTokensEnabled is disabled by default.
     /// </summary>
-    public OpenIddictSettings UseIdentityServerRefreshTokens<TDbContext, TUser>()
+    public OpenIddictSettings EnableIdentityServerRefreshTokens<TDbContext, TUser>()
         where TDbContext : DbContext =>
-        UseIdentityServerRefreshTokens(typeof(TDbContext), typeof(TUser));
+        EnableIdentityServerRefreshTokens(typeof(TDbContext), typeof(TUser));
 
     /// <summary>
     /// If you were using IdentityServer before,
@@ -170,7 +170,7 @@ public class OpenIddictSettings
     /// The functionality relies on PersistedGrants table NOT being removed from DB.
     /// IdentityServerRefreshTokensEnabled is disabled by default.
     /// </summary>
-    public OpenIddictSettings UseIdentityServerRefreshTokens(Type dbContextType, Type userType)
+    public OpenIddictSettings EnableIdentityServerRefreshTokens(Type dbContextType, Type userType)
     {
         DbContextType = dbContextType;
         UserType = userType;

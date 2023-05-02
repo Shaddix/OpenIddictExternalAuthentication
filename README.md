@@ -12,7 +12,12 @@ It contain basic implementation of `AuthenticationController`, mostly taken from
 3. Refresh token flow
 4. Authorization Code flow
 5. Resource Owner Password Flow (disabled by default, could be enabled via configuration)
-6. `UseIdentityServerRefreshTokens()` option that eases the migration from IdentityServer (i.e., that RefreshTokens from IdentityServer will still work, if `PersistedGrants` table remains)
+6. `EnableIdentityServerRefreshTokens()` option that eases the migration from IdentityServer (i.e., that RefreshTokens from IdentityServer will still work, if `PersistedGrants` table remains)
+7. `app.UseOpenIdDictConversionMiddleware()` helps to support old clients when migrating from IdentityServer. It allows to do the following:
+   1. Remove non-existing scopes
+   2. Remove header authorization (if client_id/client_secret are passed in Form parameters)
+   3. Remove client_secret for public clients (otherwise OpenIdDict complains)
+   4. Change name of form parameters (e.g. `userName` -> `username`)
 
 Here's the [vanilla js](https://oauth.arturdr.ru) or [react](https://oauth.arturdr.ru/react) demo of Google/Facebook authentication using OpenIddict on backend.
 The page has several buttons to log in via different providers.

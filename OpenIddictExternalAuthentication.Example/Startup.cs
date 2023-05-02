@@ -79,7 +79,7 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
                         options
                             .SetConfiguration(Configuration.GetSection("OpenId"))
                             .SetPublicUrl(publicUrl)
-                            .UseIdentityServerRefreshTokens<IdentityContext, IdentityUser>()
+                            .EnableIdentityServerRefreshTokens<IdentityContext, IdentityUser>()
                 )
                 .AddCore(options =>
                 {
@@ -168,6 +168,9 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
 
             app.UseRouting();
 
+            app.UseOpenIdDictConversionMiddleware(
+                new OpenIdDictConversionSettings() { ScopesToRemove = { "profile" } }
+            );
             app.UseAuthentication();
             app.UseAuthorization();
 
