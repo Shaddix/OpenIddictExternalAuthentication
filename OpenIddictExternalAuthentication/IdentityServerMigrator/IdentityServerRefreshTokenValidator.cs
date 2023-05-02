@@ -16,7 +16,7 @@ public class IdentityServerRefreshTokenValidator<TDbContext> : IExternalRefreshT
 
     public async Task<string> GetUserIdByRefreshToken(string refreshToken, string? clientId)
     {
-        var nowDate = DateTime.UtcNow.ToString("s");
+        var nowDate = DateTime.UtcNow;
         return await _dbContext.Database
             .SqlQuery<string>(
                 $"SELECT \"SubjectId\" as Value FROM \"PersistedGrants\" WHERE \"Type\" = 'refresh_token' AND \"Key\" = {refreshToken} AND \"ClientId\" = {clientId} AND \"Expiration\" > {nowDate}"
