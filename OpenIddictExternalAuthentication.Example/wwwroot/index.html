@@ -26,7 +26,8 @@
     
     <div>
         <h1>Other</h1>
-        <button onclick="refreshToken()">Refresh token</button>    
+        <button onclick="refreshToken(true)">Refresh token from IdentityServer</button>    
+        <button onclick="refreshToken(false)">Refresh token</button>    
         <button onclick="logOut()">Log Out</button>    
     </div>
 
@@ -36,6 +37,7 @@
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="module">
     let _accessToken = '';
+    let _refreshToken = '';
     const authCallbackPath = '/index.html?auth-callback=1';
     const logoutCallbackPath = '/index.html?logout-callback=1';
     const scopes = 'offline_access';
@@ -69,16 +71,19 @@
             await userManager.signoutPopup();
             alert('LogOut succeeded');
             _accessToken = null;
+            _refreshToken = null;
         } catch (e) {
             console.error('Error during authentication', e);
         }
     }
 
-    async function refreshToken() {
-        // if (!_accessToken)
-        //     alert('Not logged in');
-        //const refreshToken = "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZDQkMtSFM1MTIiLCJraWQiOiI5RTExRjVBNDc1QTJENjE1RUE4MzVGQ0IwRUUyQzQ4QjQzREEwQjc4IiwidHlwIjoib2lfcmVmdCtqd3QifQ.A7bQP76mYdH8v8ZuD_tj_Nh9QveKmq5r-GPDOEjqJ314HU1jNJeytS5k3YN3_4W1mlcGQaAHOVUwb1FKxZEvFrDjItgLKqe2WOJzZcvA_t9CiMI8qP8VST1Npz80cnfc0KahQA9A5ta_iVhXGzc5QMbcY0lPLcs25yeTU5PqYWvoM5ACvNbbVysiMZ5_0v-LH6NXT5Z30eUwEumhm-cj9rZO2GxzDgrjeV9bwFxyHdBG8-YeAE9KrvahDTOR0HZZCbQi-6GIZpkFSxN7WcRyjRmDZdE06YiLDPbB-6D36RIwgBzFbJjrthe-9b-vkrYHohFwu93AOmfGzSGx3SxtYA.r8F9XgaRCauCswKI7G6PUw.cp1wk4btC_WcDuhq5SQ7M6qn4YZwEOzrppetM6cpshCR2ksleoFNvcoOuMj8WC2asa7WpgvKERgbhN0j0tGATT8UHFsHdMENewNY6Ket9gnNejZzYxBrcvDJL5__jPAsnTOinQJT4pRB6_TBOetUTpaHYuE5y0Z3w4-cVhIzF7ayVYNcAq553LD1l28aoTJInUm0kfxRjnSZQ7Qpa6W49IQfNw8TzO8Idqglafxg0kNdbAsj0lsjeb-Ub-JCFcVKooJnLfJXP92XWsLumVb6BTFy7Ze8uuetiUBva8q5OwngoEqunIdt0jrBNtSMxYHUnv3tLiboeVUyASH2aCbwn1ZEgusug7TKHgLPLjZ4m2L8zVahw7_ukrU0Jzy2u_FvajNTgOhjpqs0MmGfyCohfiDdyAM2EXx9KoooTmS_ur-UzMwRutMhCjQIm81-A64Il-3XCukZ8OPjLelUBL9nc7M9oNK-5Aom77yJ-Oa5mTnaipobbgTeTAogsqs-RxKpUGKF2KDoY7hqW65Cl_5lCpRIyAjhADgVFhh0qkvZOOGCaEdhLiIzUZHzy1aszRTIgwYFGj3-meqai0t2GOjd29-Axi3RHUAQoK_EHtlYz7G9FHiOTKnwbmwcnhqFJSwmpHERJjc1WrF9K9LOp__xVyrSeoJiXsdpMfA6kRRfmQPclu5EAXmurBp185YdZeaxnmZNsE0qJSuKOElGVUZAX_8wTU-inw6QPtX4-hbEVv1w8BtH7rN2EsAJgBH2-U63RtROCtPNaTa7vpAo265ZVBjTNVEl6QumHOjBIVJj1rNcWb64nXqeJNoiN5bTFm5WOG-8s2FHF16TD8LfQWf-5n2u40WDmOwUfwA9YSFnlpzmlxD-LqduqpWpUFncW456wbeOHUe8lt-QSQhqMp-ALlow-qC_h1kb4I6K9b79jOBAi9FM9LCsfKkQa_QBsn1ctpzT_OFRRRFcSo-vtFUwolu-9V_1PdG48RrWdpX8mRK6v2EUwcmP2f_szjlejMTZa8u7eqmYzoi6PhYFZ0MK_cfmEOMVbxGmd7dPfdSdwHYu3HXQbPo1lYYWV503a2NBj2xWHISuIrX72f8X9vSKlOUHtciV8I5ktHfpZRWAN7ZBhbRw7VM9tp882Bisu-Mu4i1dk9PNmd4G4IC8-6T4LYXNHWdMs6_chNhzKdkTE5dWuP0kVJwrY6rOQiV81eYkMxSbu2HcHmQabtH_eeGgV2swFOGBn7fbyLcfMKfa5DmVrHVCQp-gBVLZp1QT6PXljCxSVOEywAb3zpx8K0gEec3UivR5IEh399VZyqSZx8j5s0fxcWxWI2nUZKBxAVjnWIO6wdvZco68wl4rclsI2pwNHILTGEm9Y6Zsjeqwxg4zQs_5RWf7zibj3gjBzC25TtMB-59x5-4Jf-VBqMMIcPYu5JeB4mD9m5IwDs_vu6nBvcGel8zN0bENyZ3Zta4VGnjOD9zeu-txj-rEty3ceOGyp6sz4wBgcnu0Tvj0LKWxCph0Y4eV3UjExurzHl9WkjGHvd7MtpSdy-Rqi5gwR4AcAArh5KPwNiZS7qQhnUwYZILTGc4Hfl9ievlsAnGgSgrWIMKMEn0jCIyun7ZjYd8iNRr16OR_aCmyovrPpXcw1DODd9CoH9fZvcMYEJovWr5vIS5jY5Rw_EgPMIw1TIyTxXt4-rvhSfoJo8Kk0JFypWCk_Iv1Gq0TVmNvEUH1Vn66Q3SC6bOsFMiK8LUpOlzi0Qv3qJmZUqj3_Hb66o27ofsCpnLbpkmDGYkktjJUe1Vnxow5CPC_T2TA0akwsO7AUSKbr3rHzoAPhvhXECgZ4_9TkCjoOQr6Z3yi5XRpdglCo8WiJgmsBvzVo79bW3GO1NjN5CUTTx-SMsDFaUM7vvh8GG0dHeLHmKYllUqy0UB_64UyIMcoTzyqayBKOLHrXAWjczoHd7X4yVVIY4Ta1sjO6CK-M6hy9KGly-6r9Ok9jPtPCzq5Q6dXG5gSGbcpIBp1oRmMWZ0GWP683A0EICIlHpE2SN_-lvxtcdUihEAecJeOjU9NL3UTYQvadrojVzdG88yEXW5CmwmULWuaQ10Pty4ECzHzjOc-yUGBJQvCy9ojJFLNbXT88Db-vP2R0bToMK9aDgd3ZteuC7H92cyipT4EVsYjdgPWKt5Rpt36bgZujrcx0BF6CVHvB6cA293KqTl7lAbTmR7j6zZIuunApvSad4mEaVCEeSCwcOUlWfKIcMR_4NhfJ_AEOX6CDCx-euiVPsKfrXjuCh5bLcHIhAbnXMYaZJjMbCciaupS6bK2NDxwdF6pyK0mGEwziqtVlCbqZNvxCpWTWKeHq-Vu4IToK_5rNhMCeDUp.Ra_cOQhW9RpiWm9iAfJIPJz6QTqoZFBerNDlIB3hnHs";
-        const refreshToken = "123";
+    async function refreshToken(isFromIdentityServer) {
+        const refreshToken = isFromIdentityServer ? "123" : _refreshToken;
+        if (!refreshToken) {
+            alert('Not logged in');
+            return;
+        }
+        
         try {
             const client = userManager._client;
             
@@ -96,6 +101,7 @@
             alert('Authentication succeeded');
             console.log('User', user);
             _accessToken = user.access_token;
+            _refreshToken = user.refresh_token;
         } catch (e) {
             console.error('Error during authentication', e);
         }
