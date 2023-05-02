@@ -27,6 +27,9 @@ public class ExternalRefreshTokenValidatorHandler<TUser>
 
     public async ValueTask HandleAsync(OpenIddictServerEvents.ValidateTokenContext context)
     {
+        if (context.Principal != null)
+            return;
+
         var request = context.Request;
         if (!request.IsRefreshTokenGrantType())
             return;
@@ -37,19 +40,19 @@ public class ExternalRefreshTokenValidatorHandler<TUser>
 
         foreach (var externalRefreshTokenValidator in _externalRefreshTokenValidators)
         {
-            string? userId = await externalRefreshTokenValidator.GetUserIdByRefreshToken(
+            var info = await externalRefreshTokenValidator.GetRefreshTokenInfo(
                 refreshToken,
                 request.ClientId
             );
-            if (string.IsNullOrEmpty(userId))
+            if (info == null)
                 continue;
 
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(info.UserId);
             var principal = await _signInManager.CreateUserPrincipalAsync(user);
 
-            context.Principal = principal.SetTokenType(
-                OpenIddictConstants.TokenTypeHints.RefreshToken
-            );
+            context.Principal = principal
+                .SetTokenType(OpenIddictConstants.TokenTypeHints.RefreshToken)
+                .SetScopes(info.Scopes);
         }
     }
 }
