@@ -628,7 +628,15 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
         IList<Claim> claims = await GetClaims(user, openIddictRequest);
 
         ClaimsIdentity claimIdentity = principal.Identities.First();
-        claimIdentity.AddClaims(claims);
+        
+        foreach (var claim in claims)        
+        {
+            if (claimIdentity.HasClaim(claim.Type))
+            {
+                claimIdentity.RemoveClaims(claim.Type);
+                claimIdentity.AddClaim(claim);
+            }
+        }
     }
 
     /// <summary>

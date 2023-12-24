@@ -1,7 +1,7 @@
 # OpenIddictExternalAuthentication
 [![NUGET](https://badge.fury.io/nu/Shaddix.OpenIddict.ExternalAuthentication.svg)](https://www.nuget.org/packages/Shaddix.OpenIddict.ExternalAuthentication/)
 [![MIT](https://img.shields.io/dub/l/vibe-d.svg)](https://opensource.org/licenses/MIT)
-[![NET6](https://img.shields.io/badge/-.NET%207.0-blueviolet)](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
+[![NET8](https://img.shields.io/badge/-.NET%208.0-blueviolet)](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
 
 Library that simplifies integration of [OpenIdDict](https://github.com/openiddict/openiddict-core) to a several lines of code.
 It contain basic implementation of `AuthenticationController`, mostly taken from [OpenIddict Samples](https://github.com/openiddict/openiddict-samples).
