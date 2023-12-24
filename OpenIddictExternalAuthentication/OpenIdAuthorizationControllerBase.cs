@@ -634,9 +634,10 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
             if (claimIdentity.HasClaim(claim.Type))
             {
                 claimIdentity.RemoveClaims(claim.Type);
-                claimIdentity.AddClaim(claim);
             }
         }
+
+        claimIdentity.AddClaims(claims);
     }
 
     /// <summary>
