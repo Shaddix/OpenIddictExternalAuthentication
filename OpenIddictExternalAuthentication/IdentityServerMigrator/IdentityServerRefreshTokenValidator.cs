@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using OpenIddict.Server;
 
 namespace Shaddix.OpenIddict.ExternalAuthentication.IdentityServerMigrator;
 
@@ -16,8 +17,12 @@ public class IdentityServerRefreshTokenValidator<TDbContext> : IExternalRefreshT
         _dbContext = dbContext;
     }
 
-    public async Task<RefreshTokenInfo> GetRefreshTokenInfo(string refreshToken, string? clientId)
+    public async Task<RefreshTokenInfo> GetRefreshTokenInfo(
+        OpenIddictServerEvents.ValidateTokenContext context
+    )
     {
+        var refreshToken = context.Request.RefreshToken;
+        var clientId = context.Request.ClientId;
         var key = GetHashedKey(refreshToken);
         var nowDate = DateTime.UtcNow;
         var userId = await _dbContext.Database

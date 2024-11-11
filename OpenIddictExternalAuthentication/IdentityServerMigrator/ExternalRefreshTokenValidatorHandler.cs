@@ -40,10 +40,7 @@ public class ExternalRefreshTokenValidatorHandler<TUser>
 
         foreach (var externalRefreshTokenValidator in _externalRefreshTokenValidators)
         {
-            var info = await externalRefreshTokenValidator.GetRefreshTokenInfo(
-                refreshToken,
-                request.ClientId
-            );
+            var info = await externalRefreshTokenValidator.GetRefreshTokenInfo(context);
             if (info == null)
                 continue;
 
