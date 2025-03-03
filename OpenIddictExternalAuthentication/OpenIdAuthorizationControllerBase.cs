@@ -286,7 +286,10 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
         ExternalLoginInfo externalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
         if (
             externalLoginInfo == null
-            || (request.HasPrompt(Prompts.Login) && externalLoginInfo.LoginProvider != provider)
+            || (
+                request.HasPromptValue(PromptValues.Login)
+                && externalLoginInfo.LoginProvider != provider
+            )
         )
         {
             return ExternalRedirect(provider, HttpContext.Request.QueryString.ToString());
@@ -338,7 +341,7 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
         string scheme
     )
     {
-        var forcePrompt = request.HasPrompt(Prompts.Login);
+        var forcePrompt = request.HasPromptValue(PromptValues.Login);
         AuthenticateResult? info = null;
         if (!forcePrompt)
         {
@@ -628,8 +631,8 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
         IList<Claim> claims = await GetClaims(user, openIddictRequest);
 
         ClaimsIdentity claimIdentity = principal.Identities.First();
-        
-        foreach (var claim in claims)        
+
+        foreach (var claim in claims)
         {
             if (claimIdentity.HasClaim(claim.Type))
             {

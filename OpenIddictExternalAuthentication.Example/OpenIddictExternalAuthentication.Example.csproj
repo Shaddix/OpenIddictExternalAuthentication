@@ -27,8 +27,8 @@
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.3" />
         <PackageReference Include="Microsoft.Identity.Web" Version="2.9.0" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.5" />
-        <PackageReference Include="OpenIddict.AspNetCore" Version="5.8.0" />
-        <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="5.8.0" />
+        <PackageReference Include="OpenIddict.AspNetCore" Version="6.1.1" />
+        <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="6.1.1" />
     </ItemGroup>
 
     <ItemGroup>
