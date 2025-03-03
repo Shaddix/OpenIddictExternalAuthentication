@@ -180,8 +180,8 @@ public static class OpenIddictExtensions
 
             if (!settings.IsLogoutEndpointDisabled)
             {
-                options.SetLogoutEndpointUris("/connect/logout");
-                options.UseAspNetCore().EnableLogoutEndpointPassthrough();
+                options.SetEndSessionEndpointUris("/connect/logout");
+                options.UseAspNetCore().EnableEndSessionEndpointPassthrough();
             }
 
             if (!settings.IsAuthorizeFlowDisabled)
@@ -202,10 +202,10 @@ public static class OpenIddictExtensions
             if (settings.IsDeviceCodeFlowAllowed)
             {
                 options
-                    .AllowDeviceCodeFlow()
-                    .SetDeviceEndpointUris("/connect/device")
-                    .SetVerificationEndpointUris("/connect/verify");
-                options.UseAspNetCore().EnableVerificationEndpointPassthrough();
+                    .AllowDeviceAuthorizationFlow()
+                    .SetDeviceAuthorizationEndpointUris("/connect/device")
+                    .SetEndUserVerificationEndpointUris("/connect/verify");
+                options.UseAspNetCore().EnableEndUserVerificationEndpointPassthrough();
             }
 
             if (!settings.IsRefreshTokenFlowDisabled)
