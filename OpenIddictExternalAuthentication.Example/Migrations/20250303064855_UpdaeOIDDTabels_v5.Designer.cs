@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shaddix.OpenIddict.ExternalAuthentication.Example;
 
@@ -10,9 +11,11 @@ using Shaddix.OpenIddict.ExternalAuthentication.Example;
 namespace Shaddix.OpenIddict.ExternalAuthentication.Example.Migrations
 {
     [DbContext(typeof(IdentityContext))]
-    partial class IdentityContextModelSnapshot : ModelSnapshot
+    [Migration("20250303064855_UpdaeOIDDTabels_v5")]
+    partial class UpdaeOIDDTabels_v5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.20");

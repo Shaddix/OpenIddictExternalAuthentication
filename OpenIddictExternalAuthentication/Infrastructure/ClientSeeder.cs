@@ -47,15 +47,15 @@ public class ClientSeeder
             }
             else
             {
-                if (string.IsNullOrEmpty(client.Type))
+                if (string.IsNullOrEmpty(client.ApplicationType))
                 {
                     if (string.IsNullOrEmpty(client.ClientSecret))
                     {
-                        client.Type = "public";
+                        client.ApplicationType = "public";
                     }
                     else
                     {
-                        client.Type = "confidential";
+                        client.ApplicationType = "confidential";
                     }
                 }
 
