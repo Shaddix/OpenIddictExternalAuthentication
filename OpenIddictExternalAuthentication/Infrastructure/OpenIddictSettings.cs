@@ -142,6 +142,20 @@ public class OpenIddictSettings
     }
 
     /// <summary>
+    /// Whether we need to set Issuer to the fixed URL (or take it from request url, which is the default)
+    /// </summary>
+    public bool ShouldSetIssuerToPublicUrl { get; set; } = true;
+
+    /// <summary>
+    /// Enables seeding of clients in a Worker (disabled by default)
+    /// </summary>
+    public OpenIddictSettings DisableSetIssuerToPublicUrl()
+    {
+        ShouldSetIssuerToPublicUrl = false;
+        return this;
+    }
+
+    /// <summary>
     /// If you were using IdentityServer before,
     /// then RefreshTokens issued by Identity Server will not work on OpenIdDict.
     /// If you want your users with IS refresh tokens to work, it make sense to enable this option.

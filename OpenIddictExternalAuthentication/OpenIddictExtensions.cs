@@ -171,7 +171,7 @@ public static class OpenIddictExtensions
                 }
             }
 
-            if (!string.IsNullOrEmpty(settings.PublicUrl))
+            if (!string.IsNullOrEmpty(settings.PublicUrl) && settings.ShouldSetIssuerToPublicUrl)
             {
                 options.SetIssuer(new Uri(settings.PublicUrl));
             }
