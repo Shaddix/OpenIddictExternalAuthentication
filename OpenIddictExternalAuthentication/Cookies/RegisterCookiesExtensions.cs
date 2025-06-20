@@ -11,14 +11,21 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Cookies;
 /// </summary>
 public static class RegisterCookiesExtensions
 {
+    internal static CookiesConfiguration CookiesConfiguration { get; private set; }
+
     /// <summary>
     /// Adds support for clients with UseHttpOnlyCookies set to true
     /// Remember that calling this function is not enough, and you still need to configure the Client with `UseHttpOnlyCookies: true` in appsettings!
     /// </summary>
     public static OpenIddictBuilder AddSupportForHttpOnlyCookieClients(
-        this OpenIddictBuilder openIddictBuilder
+        this OpenIddictBuilder openIddictBuilder,
+        Action<CookiesConfiguration> configure = null
     )
     {
+        var options = new CookiesConfiguration();
+        configure?.Invoke(options);
+        CookiesConfiguration = options;
+
         return openIddictBuilder
             .AddServer(options =>
             {
