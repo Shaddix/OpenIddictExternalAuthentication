@@ -16,4 +16,10 @@ public class OpenIddictClientConfiguration : OpenIddictApplicationDescriptor
     /// Rolling lifetime of a refresh token in seconds (14 days by default)
     /// </summary>
     public int? RefreshTokenLifetime { get; set; }
+
+    /// <summary>
+    /// Stores RefreshToken and AccessToken in Http Only Cookie.
+    /// Only returns AccessToken in /connect/token payload (Refresh Token is not returned)
+    /// </summary>
+    public bool UseHttpOnlyCookies { get; set; }
 }

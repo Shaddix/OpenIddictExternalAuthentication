@@ -1,5 +1,12 @@
 ﻿# Changelog
 
+## 2.9.1
+Add support for HttpOnly cookie authentication.
+To enable it you should call `services.AddOpenIddict().AddSupportForHttpOnlyCookieClients()` and configure the clients with `"UseHttpOnlyCookies": true` (e.g. in `appsettings.json`)
+
+## 2.8.1
+Update OpenIdDict to v6
+
 ## 2.6.1 UseOpenIdDictConversionMiddleware
 Added `app.UseOpenIdDictConversionMiddleware()` which helps to support old clients when migrating from IdentityServer. It allows to do the following:
 1. Remove non-existing scopes

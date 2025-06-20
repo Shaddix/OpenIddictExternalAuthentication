@@ -130,11 +130,11 @@ public static class OpenIddictExtensions
                 var typedConfiguration = settings.Configuration.Get<OpenIddictConfiguration>();
                 if (typedConfiguration?.EncryptionCertificate != null)
                 {
-                    options.AddEncryptionCertificate(typedConfiguration?.EncryptionCertificate);
+                    options.AddEncryptionCertificate(typedConfiguration.EncryptionCertificate);
                 }
                 if (typedConfiguration?.SigningCertificate != null)
                 {
-                    options.AddSigningCertificate(typedConfiguration?.SigningCertificate);
+                    options.AddSigningCertificate(typedConfiguration.SigningCertificate);
                 }
                 if (typedConfiguration?.Clients != null && typedConfiguration.Clients.Any())
                 {
