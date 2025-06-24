@@ -13,6 +13,19 @@ public class RefreshTokenFromCookiesHandler
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
 
+    /// <summary>
+    /// Gets the default descriptor definition assigned to this handler.
+    /// </summary>
+    public static OpenIddictServerHandlerDescriptor Descriptor { get; } =
+        OpenIddictServerHandlerDescriptor
+            .CreateBuilder<OpenIddictServerEvents.ValidateTokenRequestContext>()
+            .UseSingletonHandler<RefreshTokenFromCookiesHandler>()
+            .SetOrder(
+                OpenIddictServerHandlers.Exchange.ValidateRefreshTokenParameter.Descriptor.Order
+                    - 10
+            )
+            .Build();
+
     public RefreshTokenFromCookiesHandler(IHttpContextAccessor httpContextAccessor)
     {
         _httpContextAccessor = httpContextAccessor;

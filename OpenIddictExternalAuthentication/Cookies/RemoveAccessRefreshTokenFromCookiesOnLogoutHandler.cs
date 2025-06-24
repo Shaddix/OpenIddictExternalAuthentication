@@ -12,6 +12,16 @@ public class RemoveAccessRefreshTokenFromCookiesOnLogoutHandler
 
     private readonly IHttpContextAccessor _httpContextAccessor;
 
+    /// <summary>
+    /// Gets the default descriptor definition assigned to this handler.
+    /// </summary>
+    public static OpenIddictServerHandlerDescriptor Descriptor { get; } =
+        OpenIddictServerHandlerDescriptor
+            .CreateBuilder<OpenIddictServerEvents.ProcessSignOutContext>()
+            .UseSingletonHandler<RemoveAccessRefreshTokenFromCookiesOnLogoutHandler>()
+            // .SetOrder(OpenIddictServerHandlers.AttachSignInParameters.Descriptor.Order + 10)
+            .Build();
+
     public RemoveAccessRefreshTokenFromCookiesOnLogoutHandler(
         IHttpContextAccessor httpContextAccessor
     )

@@ -12,6 +12,16 @@ public class AccessTokenFromCookiesHandler
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
 
+    /// <summary>
+    /// Gets the default descriptor definition assigned to this handler.
+    /// </summary>
+    public static OpenIddictValidationHandlerDescriptor Descriptor { get; } =
+        OpenIddictValidationHandlerDescriptor
+            .CreateBuilder<OpenIddictValidationEvents.ProcessAuthenticationContext>()
+            .UseSingletonHandler<AccessTokenFromCookiesHandler>()
+            .SetOrder(int.MinValue)
+            .Build();
+
     public AccessTokenFromCookiesHandler(IHttpContextAccessor httpContextAccessor)
     {
         _httpContextAccessor = httpContextAccessor;

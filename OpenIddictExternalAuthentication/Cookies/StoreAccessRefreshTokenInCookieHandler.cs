@@ -16,6 +16,16 @@ public class StoreAccessRefreshTokenInCookieHandler
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IOpenIddictClientConfigurationProvider _clientConfigurationProvider;
 
+    /// <summary>
+    /// Gets the default descriptor definition assigned to this handler.
+    /// </summary>
+    public static OpenIddictServerHandlerDescriptor Descriptor { get; } =
+        OpenIddictServerHandlerDescriptor
+            .CreateBuilder<OpenIddictServerEvents.ProcessSignInContext>()
+            .UseSingletonHandler<StoreAccessRefreshTokenInCookieHandler>()
+            .SetOrder(OpenIddictServerHandlers.AttachSignInParameters.Descriptor.Order + 10)
+            .Build();
+
     public static readonly CookieOptions RefreshTokenCookieOption = new CookieOptions
     {
         HttpOnly = true,

@@ -1,8 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using OpenIddict.Server;
-using OpenIddict.Validation;
-using Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
+using Shaddix.OpenIddict.ExternalAuthentication.Handlers;
 
 namespace Shaddix.OpenIddict.ExternalAuthentication.Cookies;
 
@@ -32,37 +30,14 @@ public static class RegisterCookiesExtensions
                 options.AllowPasswordFlow().AllowRefreshTokenFlow();
 
                 options
-                    .AddEventHandler<OpenIddictServerEvents.ProcessSignInContext>(
-                        x =>
-                            x.UseSingletonHandler<StoreAccessRefreshTokenInCookieHandler>()
-                                .SetOrder(
-                                    OpenIddictServerHandlers.AttachSignInParameters.Descriptor.Order
-                                        + 10
-                                )
-                    )
-                    .AddEventHandler<OpenIddictServerEvents.ProcessSignOutContext>(
-                        x =>
-                            x.UseSingletonHandler<RemoveAccessRefreshTokenFromCookiesOnLogoutHandler>()
-                    )
-                    .AddEventHandler<OpenIddictServerEvents.ValidateTokenRequestContext>(
-                        x =>
-                            x.UseSingletonHandler<RefreshTokenFromCookiesHandler>()
-                                .SetOrder(
-                                    OpenIddictServerHandlers
-                                        .Exchange
-                                        .ValidateRefreshTokenParameter
-                                        .Descriptor
-                                        .Order - 10
-                                )
-                    );
+                    .AddEventHandler(StoreAccessRefreshTokenInCookieHandler.Descriptor)
+                    .AddEventHandler(RemoveAccessRefreshTokenFromCookiesOnLogoutHandler.Descriptor)
+                    .AddEventHandler(RefreshTokenFromCookiesHandler.Descriptor)
+                    .AddEventHandler(CopyExtraParametersToResponse.Descriptor);
             })
             .AddValidation(options =>
             {
-                options.AddEventHandler<OpenIddictValidationEvents.ProcessAuthenticationContext>(
-                    x =>
-                        x.UseSingletonHandler<AccessTokenFromCookiesHandler>()
-                            .SetOrder(int.MinValue)
-                );
+                options.AddEventHandler(AccessTokenFromCookiesHandler.Descriptor);
             });
     }
 }
