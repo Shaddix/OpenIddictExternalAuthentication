@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+
 namespace Shaddix.OpenIddict.ExternalAuthentication.Cookies;
 
 public class CookiesConfiguration
@@ -8,13 +10,20 @@ public class CookiesConfiguration
     /// False by default
     /// </summary>
     public bool IsUseSessionCookie { get; set; } = false;
-    
+    public SameSiteMode SameSite { get; set; } = SameSiteMode.Strict;
+
     /// <summary>
     /// Disables the call to options.RegisterScopes with available client scopes (enabled by default)
     /// </summary>
     public CookiesConfiguration UseSessionCookie()
     {
         IsUseSessionCookie = true;
+        return this;
+    }
+
+    public CookiesConfiguration SetSameSiteMode(SameSiteMode sameSite)
+    {
+        SameSite = sameSite;
         return this;
     }
 }

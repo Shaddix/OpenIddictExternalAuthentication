@@ -65,7 +65,7 @@ public class StoreAccessRefreshTokenInCookieHandler
                 {
                     HttpOnly = RefreshTokenCookieOption.HttpOnly,
                     Secure = RefreshTokenCookieOption.Secure,
-                    SameSite = RefreshTokenCookieOption.SameSite,
+                    SameSite = RegisterCookiesExtensions.CookiesConfiguration.SameSite,
                     Path = RefreshTokenCookieOption.Path,
                 };
                 if (!RegisterCookiesExtensions.CookiesConfiguration.IsUseSessionCookie)
@@ -88,7 +88,7 @@ public class StoreAccessRefreshTokenInCookieHandler
                 {
                     HttpOnly = AccessTokenCookieOption.HttpOnly,
                     Secure = AccessTokenCookieOption.Secure,
-                    SameSite = AccessTokenCookieOption.SameSite,
+                    SameSite = RegisterCookiesExtensions.CookiesConfiguration.SameSite,
                     Path = AccessTokenCookieOption.Path,
                 };
                 if (!RegisterCookiesExtensions.CookiesConfiguration.IsUseSessionCookie)
