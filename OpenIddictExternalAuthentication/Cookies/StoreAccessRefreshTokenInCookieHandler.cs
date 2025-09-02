@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using OpenIddict.Abstractions;
@@ -14,7 +15,7 @@ public class StoreAccessRefreshTokenInCookieHandler
     public const string RefreshTokenCookieName = "refresh_token";
 
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IOpenIddictClientConfigurationProvider _clientConfigurationProvider;
+    private readonly IOpenIddictApplicationManager _applicationManager;
 
     /// <summary>
     /// Gets the default descriptor definition assigned to this handler.
@@ -22,7 +23,7 @@ public class StoreAccessRefreshTokenInCookieHandler
     public static OpenIddictServerHandlerDescriptor Descriptor { get; } =
         OpenIddictServerHandlerDescriptor
             .CreateBuilder<OpenIddictServerEvents.ProcessSignInContext>()
-            .UseSingletonHandler<StoreAccessRefreshTokenInCookieHandler>()
+            .UseScopedHandler<StoreAccessRefreshTokenInCookieHandler>()
             .SetOrder(OpenIddictServerHandlers.AttachSignInParameters.Descriptor.Order + 10)
             .Build();
 
@@ -43,20 +44,27 @@ public class StoreAccessRefreshTokenInCookieHandler
 
     public StoreAccessRefreshTokenInCookieHandler(
         IHttpContextAccessor httpContextAccessor,
-        IOpenIddictClientConfigurationProvider clientConfigurationProvider
+        IOpenIddictApplicationManager applicationManager
     )
     {
         _httpContextAccessor = httpContextAccessor;
-        _clientConfigurationProvider = clientConfigurationProvider;
+        _applicationManager = applicationManager;
     }
 
-    public ValueTask HandleAsync(OpenIddictServerEvents.ProcessSignInContext context)
+    public async ValueTask HandleAsync(OpenIddictServerEvents.ProcessSignInContext context)
     {
         if (context.EndpointType != OpenIddictServerEndpointType.Token)
-            return ValueTask.CompletedTask;
+            return;
 
-        var clientConfiguration = _clientConfigurationProvider.GetConfiguration(context.ClientId);
-        if (clientConfiguration.UseHttpOnlyCookies)
+        var client = await _applicationManager.FindByClientIdAsync(context.ClientId);
+        var settings = await _applicationManager.GetSettingsAsync(client);
+        if (
+            settings
+                .GetValueOrDefault(
+                    Infrastructure.OpenIddictClientConfiguration.SettingsUseHttpOnlyCookiesName
+                )
+                ?.ToLowerInvariant() == "true"
+        )
         {
             // Set the refresh token in an HTTP-only cookie
             if (!string.IsNullOrEmpty(context.RefreshToken))
@@ -70,8 +78,11 @@ public class StoreAccessRefreshTokenInCookieHandler
                 };
                 if (!RegisterCookiesExtensions.CookiesConfiguration.IsUseSessionCookie)
                 {
-                    cookieOption.Expires = clientConfiguration.RefreshTokenLifetime.HasValue
-                        ? DateTime.UtcNow.AddSeconds(clientConfiguration.RefreshTokenLifetime.Value)
+                    var refreshTokenLifetime = settings.GetValueOrDefault(
+                        OpenIddictConstants.Settings.TokenLifetimes.RefreshToken
+                    );
+                    cookieOption.Expires = !string.IsNullOrEmpty(refreshTokenLifetime)
+                        ? DateTime.UtcNow.AddSeconds(double.Parse(refreshTokenLifetime))
                         : DateTime.UtcNow.AddDays(14);
                 }
 
@@ -93,8 +104,11 @@ public class StoreAccessRefreshTokenInCookieHandler
                 };
                 if (!RegisterCookiesExtensions.CookiesConfiguration.IsUseSessionCookie)
                 {
-                    cookieOption.Expires = clientConfiguration.AccessTokenLifetime.HasValue
-                        ? DateTime.UtcNow.AddSeconds(clientConfiguration.AccessTokenLifetime.Value)
+                    var accessTokenLifetime = settings.GetValueOrDefault(
+                        OpenIddictConstants.Settings.TokenLifetimes.AccessToken
+                    );
+                    cookieOption.Expires = !string.IsNullOrEmpty(accessTokenLifetime)
+                        ? DateTime.UtcNow.AddSeconds(double.Parse(accessTokenLifetime))
                         : DateTime.UtcNow.AddSeconds(3600);
                 }
 
@@ -110,7 +124,5 @@ public class StoreAccessRefreshTokenInCookieHandler
             response.RemoveParameter(OpenIddictConstants.Parameters.RefreshToken);
             response.RemoveParameter(OpenIddictConstants.Parameters.AccessToken);
         }
-
-        return ValueTask.CompletedTask;
     }
 }

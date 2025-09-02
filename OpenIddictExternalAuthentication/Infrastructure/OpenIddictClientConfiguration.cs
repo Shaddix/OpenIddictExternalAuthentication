@@ -7,6 +7,8 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 /// </summary>
 public class OpenIddictClientConfiguration : OpenIddictApplicationDescriptor
 {
+    public const string SettingsUseHttpOnlyCookiesName = nameof(UseHttpOnlyCookies);
+
     /// <summary>
     /// Lifetime of an access token in seconds (3600 by default)
     /// </summary>

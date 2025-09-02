@@ -333,7 +333,7 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     protected virtual async Task UpdateUser(TUser user, ExternalLoginInfo externalLoginInfo) { }
 
     /// <summary>
-    /// Tries to authorize the user user built-in method without using any specific provider.
+    /// Tries to authorize the user built-in method without using any specific provider.
     /// Usually this means showing an authentication form.
     /// </summary>
     protected virtual async Task<IActionResult> AuthorizeUsingDefaultSettings(

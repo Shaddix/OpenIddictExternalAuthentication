@@ -5,24 +5,18 @@ using Microsoft.Extensions.Options;
 namespace Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 
 /// <summary>
-/// Provides configuration for openiddict client (
+/// Provides configuration for openiddict client
 /// </summary>
 public class OpenIddictClientConfigurationProvider : IOpenIddictClientConfigurationProvider
 {
     private readonly Dictionary<string, OpenIddictClientConfiguration> _clients;
 
     /// <summary>
-    /// Constructs OpenIddictClientConfigurationProvider 
+    /// Constructs OpenIddictClientConfigurationProvider
     /// </summary>
     public OpenIddictClientConfigurationProvider(IOptions<OpenIddictConfiguration> configuration)
     {
         _clients = configuration.Value.Clients.Values.ToDictionary(x => x.ClientId);
-    }
-
-    /// <inheritdoc />
-    public OpenIddictClientConfiguration GetConfiguration(string clientId)
-    {
-        return _clients[clientId];
     }
 
     /// <inheritdoc />
