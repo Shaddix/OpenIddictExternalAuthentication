@@ -82,7 +82,7 @@ public class StoreAccessRefreshTokenInCookieHandler
                         OpenIddictConstants.Settings.TokenLifetimes.RefreshToken
                     );
                     cookieOption.Expires = !string.IsNullOrEmpty(refreshTokenLifetime)
-                        ? DateTime.UtcNow.AddSeconds(double.Parse(refreshTokenLifetime))
+                        ? DateTime.UtcNow.Add(TimeSpan.Parse(refreshTokenLifetime))
                         : DateTime.UtcNow.AddDays(14);
                 }
 
@@ -108,7 +108,7 @@ public class StoreAccessRefreshTokenInCookieHandler
                         OpenIddictConstants.Settings.TokenLifetimes.AccessToken
                     );
                     cookieOption.Expires = !string.IsNullOrEmpty(accessTokenLifetime)
-                        ? DateTime.UtcNow.AddSeconds(double.Parse(accessTokenLifetime))
+                        ? DateTime.UtcNow.Add(TimeSpan.Parse(accessTokenLifetime))
                         : DateTime.UtcNow.AddSeconds(3600);
                 }
 
