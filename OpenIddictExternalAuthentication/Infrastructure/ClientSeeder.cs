@@ -37,6 +37,8 @@ public class ClientSeeder
                 PrependBaseUriToRelativeUris(client.PostLogoutRedirectUris, baseUri);
             }
 
+            CopyDataToSettings(client);
+
             object clientObject = await _applicationManager
                 .FindByClientIdAsync(client.ClientId!)
                 .ConfigureAwait(false);
@@ -61,25 +63,26 @@ public class ClientSeeder
                 }
 
                 await _applicationManager.PopulateAsync(clientObject, client).ConfigureAwait(false);
-                if (client.AccessTokenLifetime.HasValue)
-                    client.Settings[OpenIddictConstants.Settings.TokenLifetimes.AccessToken] =
-                        TimeSpan
-                            .FromSeconds(client.AccessTokenLifetime.Value)
-                            .ToString("c", CultureInfo.InvariantCulture);
-                if (client.RefreshTokenLifetime.HasValue)
-                    client.Settings[OpenIddictConstants.Settings.TokenLifetimes.RefreshToken] =
-                        TimeSpan
-                            .FromSeconds(client.RefreshTokenLifetime.Value)
-                            .ToString("c", CultureInfo.InvariantCulture);
-
-                client.Settings[OpenIddictClientConfiguration.SettingsUseHttpOnlyCookiesName] =
-                    client.UseHttpOnlyCookies.ToString();
-
                 await _applicationManager
                     .UpdateAsync(clientObject, client.ClientSecret ?? "")
                     .ConfigureAwait(false);
             }
         }
+    }
+
+    private void CopyDataToSettings(OpenIddictClientConfiguration client)
+    {
+        if (client.AccessTokenLifetime.HasValue)
+            client.Settings[OpenIddictConstants.Settings.TokenLifetimes.AccessToken] = TimeSpan
+                .FromSeconds(client.AccessTokenLifetime.Value)
+                .ToString("c", CultureInfo.InvariantCulture);
+        if (client.RefreshTokenLifetime.HasValue)
+            client.Settings[OpenIddictConstants.Settings.TokenLifetimes.RefreshToken] = TimeSpan
+                .FromSeconds(client.RefreshTokenLifetime.Value)
+                .ToString("c", CultureInfo.InvariantCulture);
+
+        client.Settings[OpenIddictClientConfiguration.SettingsUseHttpOnlyCookiesName] =
+            client.UseHttpOnlyCookies.ToString();
     }
 
     private static void PrependBaseUriToRelativeUris(HashSet<Uri> uris, Uri baseUri)

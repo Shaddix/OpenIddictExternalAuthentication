@@ -49,7 +49,6 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     /// </summary>
     protected readonly UserManager<TUser> _userManager;
 
-    private readonly IOpenIddictClientConfigurationProvider _clientConfigurationProvider;
     private readonly ILogger<OpenIdAuthorizationControllerBase<TUser, TKey>> _logger;
 
     /// <summary>
@@ -63,13 +62,11 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
     protected OpenIdAuthorizationControllerBase(
         SignInManager<TUser> signInManager,
         UserManager<TUser> userManager,
-        IOpenIddictClientConfigurationProvider clientConfigurationProvider,
         ILogger<OpenIdAuthorizationControllerBase<TUser, TKey>> logger
     )
     {
         _signInManager = signInManager;
         _userManager = userManager;
-        _clientConfigurationProvider = clientConfigurationProvider;
         _logger = logger;
     }
 
@@ -539,28 +536,6 @@ public abstract class OpenIdAuthorizationControllerBase<TUser, TKey> : Controlle
         }
 
         var principal = await _signInManager.CreateUserPrincipalAsync(user);
-        if (
-            !string.IsNullOrEmpty(request.ClientId)
-            && _clientConfigurationProvider.TryGetConfiguration(
-                request.ClientId,
-                out var configuration
-            )
-        )
-        {
-            if (configuration.RefreshTokenLifetime != null)
-            {
-                principal.SetRefreshTokenLifetime(
-                    TimeSpan.FromSeconds(configuration.RefreshTokenLifetime.Value)
-                );
-            }
-
-            if (configuration.AccessTokenLifetime != null)
-            {
-                principal.SetAccessTokenLifetime(
-                    TimeSpan.FromSeconds(configuration.AccessTokenLifetime.Value)
-                );
-            }
-        }
 
         await AddClaims(principal, user, request);
 
