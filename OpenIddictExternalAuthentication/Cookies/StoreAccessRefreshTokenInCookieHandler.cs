@@ -58,13 +58,19 @@ public class StoreAccessRefreshTokenInCookieHandler
 
         var client = await _applicationManager.FindByClientIdAsync(context.ClientId);
         var settings = await _applicationManager.GetSettingsAsync(client);
-        if (
+
+        var useHttpOnlyCookie =
+            settings
+                .GetValueOrDefault(OpenIddictClientConfiguration.SettingsUseHttpOnlyCookiesName)
+                ?.ToLowerInvariant() == "true";
+        var useHttpOnlyCookieKeepPayload =
             settings
                 .GetValueOrDefault(
-                    Infrastructure.OpenIddictClientConfiguration.SettingsUseHttpOnlyCookiesName
+                    OpenIddictClientConfiguration.SettingsUseHttpOnlyCookiesKeepPayloadName
                 )
-                ?.ToLowerInvariant() == "true"
-        )
+                ?.ToLowerInvariant() == "true";
+
+        if (useHttpOnlyCookie || useHttpOnlyCookieKeepPayload)
         {
             // Set the refresh token in an HTTP-only cookie
             if (!string.IsNullOrEmpty(context.RefreshToken))
@@ -119,10 +125,13 @@ public class StoreAccessRefreshTokenInCookieHandler
                 );
             }
 
-            // Remove the refresh token from the response
-            var response = context.Transaction.Response;
-            response.RemoveParameter(OpenIddictConstants.Parameters.RefreshToken);
-            response.RemoveParameter(OpenIddictConstants.Parameters.AccessToken);
+            if (!useHttpOnlyCookieKeepPayload)
+            {
+                // Remove the refresh token from the response
+                var response = context.Transaction.Response;
+                response.RemoveParameter(OpenIddictConstants.Parameters.RefreshToken);
+                response.RemoveParameter(OpenIddictConstants.Parameters.AccessToken);
+            }
         }
     }
 }

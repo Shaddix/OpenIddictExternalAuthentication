@@ -8,6 +8,9 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 public class OpenIddictClientConfiguration : OpenIddictApplicationDescriptor
 {
     public const string SettingsUseHttpOnlyCookiesName = nameof(UseHttpOnlyCookies);
+    public const string SettingsUseHttpOnlyCookiesKeepPayloadName = nameof(
+        UseHttpOnlyCookiesKeepPayload
+    );
 
     /// <summary>
     /// Lifetime of an access token in seconds (3600 by default)
@@ -21,7 +24,13 @@ public class OpenIddictClientConfiguration : OpenIddictApplicationDescriptor
 
     /// <summary>
     /// Stores RefreshToken and AccessToken in Http Only Cookie.
-    /// Only returns AccessToken in /connect/token payload (Refresh Token is not returned)
+    /// Do not return anything in payload.
     /// </summary>
-    public bool UseHttpOnlyCookies { get; set; }
+    public bool? UseHttpOnlyCookies { get; set; }
+
+    /// <summary>
+    /// Stores RefreshToken and AccessToken in Http Only Cookie.
+    /// Also returns AccessToken/RefreshToken in /connect/token payload
+    /// </summary>
+    public bool? UseHttpOnlyCookiesKeepPayload { get; set; }
 }

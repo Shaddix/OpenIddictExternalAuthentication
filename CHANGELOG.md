@@ -1,5 +1,10 @@
 ﻿# Changelog
 
+## 2.10.6
+Add support for returning AccessToken / RefreshToken together with HttpOnly cookie authentication.
+To use that configure the clients with `"UseHttpOnlyCookiesKeepPayload": true` (e.g. in `appsettings.json`)
+
+
 ## 2.9.1
 Add support for HttpOnly cookie authentication.
 To enable it you should call `services.AddOpenIddict().AddSupportForHttpOnlyCookieClients()` and configure the clients with `"UseHttpOnlyCookies": true` (e.g. in `appsettings.json`)

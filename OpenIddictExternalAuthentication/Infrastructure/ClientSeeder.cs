@@ -81,8 +81,14 @@ public class ClientSeeder
                 .FromSeconds(client.RefreshTokenLifetime.Value)
                 .ToString("c", CultureInfo.InvariantCulture);
 
-        client.Settings[OpenIddictClientConfiguration.SettingsUseHttpOnlyCookiesName] =
-            client.UseHttpOnlyCookies.ToString();
+        if (client.UseHttpOnlyCookies != null)
+            client.Settings[OpenIddictClientConfiguration.SettingsUseHttpOnlyCookiesName] =
+                client.UseHttpOnlyCookies.ToString();
+
+        if (client.UseHttpOnlyCookiesKeepPayload != null)
+            client.Settings[
+                OpenIddictClientConfiguration.SettingsUseHttpOnlyCookiesKeepPayloadName
+            ] = client.UseHttpOnlyCookiesKeepPayload.ToString();
     }
 
     private static void PrependBaseUriToRelativeUris(HashSet<Uri> uris, Uri baseUri)
