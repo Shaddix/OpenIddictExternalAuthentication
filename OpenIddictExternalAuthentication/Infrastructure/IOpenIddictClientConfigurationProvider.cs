@@ -9,12 +9,7 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 public interface IOpenIddictClientConfigurationProvider
 {
     /// <summary>
-    /// Returns configuration for passed clientId or null if client is not found. 
-    /// </summary>
-    OpenIddictClientConfiguration? GetConfiguration(string clientId);
-
-    /// <summary>
-    /// Returns configuration for passed clientId (and `true` as returnor null if client is not found. 
+    /// Returns configuration for passed clientId (and `true` as return or null if client is not found.
     /// </summary>
     bool TryGetConfiguration(string clientId, out OpenIddictClientConfiguration configuration);
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using OpenIddict.Abstractions;
@@ -36,6 +37,8 @@ public class ClientSeeder
                 PrependBaseUriToRelativeUris(client.PostLogoutRedirectUris, baseUri);
             }
 
+            CopyDataToSettings(client);
+
             object clientObject = await _applicationManager
                 .FindByClientIdAsync(client.ClientId!)
                 .ConfigureAwait(false);
@@ -65,6 +68,27 @@ public class ClientSeeder
                     .ConfigureAwait(false);
             }
         }
+    }
+
+    private void CopyDataToSettings(OpenIddictClientConfiguration client)
+    {
+        if (client.AccessTokenLifetime.HasValue)
+            client.Settings[OpenIddictConstants.Settings.TokenLifetimes.AccessToken] = TimeSpan
+                .FromSeconds(client.AccessTokenLifetime.Value)
+                .ToString("c", CultureInfo.InvariantCulture);
+        if (client.RefreshTokenLifetime.HasValue)
+            client.Settings[OpenIddictConstants.Settings.TokenLifetimes.RefreshToken] = TimeSpan
+                .FromSeconds(client.RefreshTokenLifetime.Value)
+                .ToString("c", CultureInfo.InvariantCulture);
+
+        if (client.UseHttpOnlyCookies != null)
+            client.Settings[OpenIddictClientConfiguration.SettingsUseHttpOnlyCookiesName] =
+                client.UseHttpOnlyCookies.ToString();
+
+        if (client.UseHttpOnlyCookiesKeepPayload != null)
+            client.Settings[
+                OpenIddictClientConfiguration.SettingsUseHttpOnlyCookiesKeepPayloadName
+            ] = client.UseHttpOnlyCookiesKeepPayload.ToString();
     }
 
     private static void PrependBaseUriToRelativeUris(HashSet<Uri> uris, Uri baseUri)

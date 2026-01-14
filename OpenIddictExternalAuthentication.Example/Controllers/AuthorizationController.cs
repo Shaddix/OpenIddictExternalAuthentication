@@ -14,9 +14,8 @@ public class AuthorizationController : OpenIdAuthorizationControllerBase<Identit
     public AuthorizationController(
         SignInManager<IdentityUser> signInManager,
         UserManager<IdentityUser> userManager,
-        IOpenIddictClientConfigurationProvider clientConfigurationProvider,
         ILogger<AuthorizationController> logger
-    ) : base(signInManager, userManager, clientConfigurationProvider, logger) { }
+    ) : base(signInManager, userManager, logger) { }
 
     protected override async Task<IList<Claim>> GetClaims(
         IdentityUser user,

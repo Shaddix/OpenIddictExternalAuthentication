@@ -15,6 +15,7 @@ using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;
+using Shaddix.OpenIddict.ExternalAuthentication.Cookies;
 using Shaddix.OpenIddict.ExternalAuthentication.Example.Permissions;
 using Shaddix.OpenIddict.ExternalAuthentication.Infrastructure;
 
@@ -76,6 +77,7 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
             var publicUrl = Configuration.GetSection("Auth").GetValue<string>("PublicHost");
             services
                 .AddOpenIddict()
+                .AddSupportForHttpOnlyCookieClients()
                 .AddDefaultAuthorizationController(
                     options =>
                         options
