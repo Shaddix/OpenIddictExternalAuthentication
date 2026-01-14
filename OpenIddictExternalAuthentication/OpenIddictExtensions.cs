@@ -232,7 +232,7 @@ public static class OpenIddictExtensions
         var identityServerRefreshTokenValidatorType =
             typeof(IdentityServerRefreshTokenValidator<>).MakeGenericType(settings.DbContextType);
         openIddictBuilder.Services.AddTransient(identityServerRefreshTokenValidatorType);
-        openIddictBuilder.Services.AddTransient<IExternalRefreshTokenValidator>(
+        openIddictBuilder.Services.AddTransient(
             provider =>
                 provider.GetRequiredService(identityServerRefreshTokenValidatorType)
                 as IExternalRefreshTokenValidator
@@ -246,9 +246,11 @@ public static class OpenIddictExtensions
         options.AddEventHandler<OpenIddictServerEvents.ValidateTokenContext>(builder =>
         {
             builder
-                .UseScopedHandler<
-                    IOpenIddictServerHandler<OpenIddictServerEvents.ValidateTokenContext>
-                >(s => s.GetRequiredService(validatorHandlerType))
+                .UseScopedHandler(
+                    s =>
+                        s.GetRequiredService(validatorHandlerType)
+                        as IOpenIddictServerHandler<OpenIddictServerEvents.ValidateTokenContext>
+                )
                 .SetOrder(
                     OpenIddictServerHandlers.Protection.ValidateIdentityModelToken.Descriptor.Order
                         - 100
