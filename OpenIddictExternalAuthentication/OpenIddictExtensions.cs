@@ -37,20 +37,25 @@ public static class OpenIddictExtensions
         OpenIdCertificateInfo signingCertificate
     )
     {
-        if (
-            !string.IsNullOrEmpty(signingCertificate?.Password)
-            && !string.IsNullOrEmpty(signingCertificate?.Base64Certificate)
-        )
+        if (string.IsNullOrEmpty(signingCertificate?.Password))
         {
-            options.AddSigningCertificate(
-                new MemoryStream(Convert.FromBase64String(signingCertificate.Base64Certificate)),
-                signingCertificate.Password
+            throw new ArgumentNullException(
+                nameof(signingCertificate.Password),
+                "Signing certificate password is not provided"
             );
         }
-        else
+        if (string.IsNullOrEmpty(signingCertificate?.Base64Certificate))
         {
-            options.AddDevelopmentSigningCertificate();
+            throw new ArgumentNullException(
+                nameof(signingCertificate.Password),
+                "Signing certificate is not provided"
+            );
         }
+
+        options.AddSigningCertificate(
+            new MemoryStream(Convert.FromBase64String(signingCertificate.Base64Certificate)),
+            signingCertificate.Password
+        );
 
         return options;
     }
@@ -75,20 +80,25 @@ public static class OpenIddictExtensions
         OpenIdCertificateInfo encryptionCertificate
     )
     {
-        if (
-            !string.IsNullOrEmpty(encryptionCertificate?.Password)
-            && !string.IsNullOrEmpty(encryptionCertificate?.Base64Certificate)
-        )
+        if (string.IsNullOrEmpty(encryptionCertificate?.Password))
         {
-            options.AddEncryptionCertificate(
-                new MemoryStream(Convert.FromBase64String(encryptionCertificate.Base64Certificate)),
-                encryptionCertificate.Password
+            throw new ArgumentNullException(
+                nameof(encryptionCertificate.Password),
+                "Encryption certificate password is not provided"
             );
         }
-        else
+        if (string.IsNullOrEmpty(encryptionCertificate?.Base64Certificate))
         {
-            options.AddDevelopmentEncryptionCertificate();
+            throw new ArgumentNullException(
+                nameof(encryptionCertificate.Password),
+                "Encryption certificate is not provided"
+            );
         }
+
+        options.AddEncryptionCertificate(
+            new MemoryStream(Convert.FromBase64String(encryptionCertificate.Base64Certificate)),
+            encryptionCertificate.Password
+        );
 
         return options;
     }
@@ -128,14 +138,22 @@ public static class OpenIddictExtensions
             {
                 openIddictBuilder.AddOpenIddictConfiguration(settings.Configuration);
                 var typedConfiguration = settings.Configuration.Get<OpenIddictConfiguration>();
-                if (typedConfiguration?.EncryptionCertificate != null)
+                if (
+                    !string.IsNullOrEmpty(
+                        typedConfiguration?.EncryptionCertificate?.Base64Certificate
+                    )
+                )
                 {
                     options.AddEncryptionCertificate(typedConfiguration.EncryptionCertificate);
                 }
-                if (typedConfiguration?.SigningCertificate != null)
+
+                if (
+                    !string.IsNullOrEmpty(typedConfiguration?.SigningCertificate?.Base64Certificate)
+                )
                 {
                     options.AddSigningCertificate(typedConfiguration.SigningCertificate);
                 }
+
                 if (typedConfiguration?.Clients != null && typedConfiguration.Clients.Any())
                 {
                     options.Services.AddTransient<ClientSeeder>();

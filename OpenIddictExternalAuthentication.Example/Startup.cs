@@ -78,13 +78,18 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Example
             services
                 .AddOpenIddict()
                 .AddSupportForHttpOnlyCookieClients()
-                .AddDefaultAuthorizationController(
-                    options =>
-                        options
-                            .SetConfiguration(Configuration.GetSection("OpenId"))
-                            .SetPublicUrl(publicUrl)
-                            .EnableIdentityServerRefreshTokens<IdentityContext, IdentityUser>()
-                )
+                .AddDefaultAuthorizationController(options =>
+                {
+                    options
+                        .SetConfiguration(Configuration.GetSection("OpenId"))
+                        .SetPublicUrl(publicUrl)
+                        .EnableIdentityServerRefreshTokens<IdentityContext, IdentityUser>();
+
+                    if (_webHostEnvironment.IsDevelopment())
+                        options.OpenIddictServerBuilder
+                            .AddDevelopmentEncryptionCertificate()
+                            .AddDevelopmentSigningCertificate();
+                })
                 .AddCore(options =>
                 {
                     options.UseEntityFrameworkCore().UseDbContext<IdentityContext>();
