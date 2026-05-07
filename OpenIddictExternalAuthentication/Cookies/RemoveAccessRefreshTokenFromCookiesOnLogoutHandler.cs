@@ -7,9 +7,6 @@ namespace Shaddix.OpenIddict.ExternalAuthentication.Cookies;
 public class RemoveAccessRefreshTokenFromCookiesOnLogoutHandler
     : IOpenIddictServerHandler<OpenIddictServerEvents.ProcessSignOutContext>
 {
-    public const string AccessTokenCookieName = "access_token";
-    public const string RefreshTokenCookieName = "refresh_token";
-
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     /// <summary>
@@ -32,11 +29,11 @@ public class RemoveAccessRefreshTokenFromCookiesOnLogoutHandler
     public ValueTask HandleAsync(OpenIddictServerEvents.ProcessSignOutContext context)
     {
         _httpContextAccessor.HttpContext.Response.Cookies.Delete(
-            RefreshTokenCookieName,
+            StoreAccessRefreshTokenInCookieHandler.RefreshTokenCookieName,
             StoreAccessRefreshTokenInCookieHandler.RefreshTokenCookieOption
         );
         _httpContextAccessor.HttpContext.Response.Cookies.Delete(
-            AccessTokenCookieName,
+            StoreAccessRefreshTokenInCookieHandler.AccessTokenCookieName,
             StoreAccessRefreshTokenInCookieHandler.AccessTokenCookieOption
         );
 
